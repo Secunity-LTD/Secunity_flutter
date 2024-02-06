@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1095188614950",
+    "project_id": "secu-24360",
+    "storage_bucket": "secu-24360.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095188614950:android:1d64fa09d1a0ecf70abbe7",
+        "android_client_info": {
+          "package_name": "com.example.secunity_2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT5mSQ3-Y-EKNJPUZzVdxgBk7U692fSwM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
