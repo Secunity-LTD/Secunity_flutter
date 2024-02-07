@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:secunity_2/screens/authenticate/sign_in.dart';
-import 'package:secunity_2/services/auth.dart';
+import 'package:secunity_2/screens/authenticate/sign_up.dart';
 
 class Authenticate extends StatefulWidget {
   const Authenticate({super.key});
@@ -10,10 +10,17 @@ class Authenticate extends StatefulWidget {
 }
 
 class _AuthenticateState extends State<Authenticate> {
+  bool showSignIn = true;
+  void toggelView(){
+    setState(()=> showSignIn = !showSignIn);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: SignIn(),
-    );
+    if(showSignIn){
+      return SignIn(toggelView: toggelView);
+    }else{
+      return SignUp(toggelView: toggelView);
+    }
   }
 }
