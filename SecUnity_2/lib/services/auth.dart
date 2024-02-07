@@ -6,12 +6,7 @@ class AuthService {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // // create user object based on Firebase user
-  // MyUser? fromFirebaseToUser(UserCredential user){
-  //
-  //   return user != null? MyUser(uid: user.uid) : null;
-  // }
-  // create user object based on Firebase user
+
   MyUser? _userFromFirebaseUser(UserCredential userCredential) {
     User? user = userCredential.user;
 
@@ -28,11 +23,11 @@ class AuthService {
   // sign in anon
   Future signInAnon() async {
     try {
-      // UserCredential AuthResult result = await _auth.signInAnonymously();
-      // User FirebaseUser  user = result.user;
-      UserCredential result = await _auth.signInAnonymously();
-      User? user = result.user;
-      return _userFromFirebaseUser(user as UserCredential);
+      // UserCredential
+      final userCredential = await _auth.signInAnonymously();
+      // User
+      final user = userCredential.user;
+      return _userFromFirebaseUser(userCredential);
     } catch (e) {
       print(e.toString());
       return null;

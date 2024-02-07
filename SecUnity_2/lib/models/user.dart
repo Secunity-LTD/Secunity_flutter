@@ -1,6 +1,6 @@
 class MyUser {
 
-  String uid;
+  final String uid;
   // int personal_id;
   // String first_name;
   // String last_name;
