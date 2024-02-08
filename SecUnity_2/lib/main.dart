@@ -3,10 +3,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:secunity_2/screens/Home/leader_screen.dart';
 import 'package:secunity_2/screens/Home/crew_screen.dart';
+import 'package:secunity_2/screens/authenticate/sign_in.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:secunity_2/screens/authenticate/login_screen.dart';
+import 'package:secunity_2/screens/authenticate/sign_in.dart';
 
 import 'models/UserModel.dart';
 
@@ -40,10 +42,14 @@ class MyApp extends StatelessWidget {
             initialRoute: '/login',
             // Define routes
             routes: {
-              '/login': (context) => LoginScreen(),
+              '/login': (context) => SignIn(
+                    toggelView: () {},
+                  ),
+              '/leader': (context) => LeaderScreen(),
+              '/crew': (context) => CrewScreen(),
               // Add other routes here
             },
-            home: LeaderScreen(),
+            home: Wrapper(),
           );
         });
   }
