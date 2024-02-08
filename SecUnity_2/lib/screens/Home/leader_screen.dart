@@ -1,5 +1,5 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LeaderScreen extends StatefulWidget {
@@ -10,6 +10,167 @@ class LeaderScreen extends StatefulWidget {
 class _LeaderPageState extends State<LeaderScreen> {
   final TextEditingController squadNameController = TextEditingController();
   final TextEditingController squadCityController = TextEditingController();
+
+  bool squadCreated = false; // Variable to track squad creation status
+
+  // List to store join requests
+  List<QueryDocumentSnapshot> joinRequests = [];
+
+  void initState() {
+    super.initState();
+    _checkIfLeader(); // Check if the current user is a leader
+    _fetchJoinRequests(); // Fetch join requests
+  }
+
+  void _checkIfLeader() async {
+    // Query to check if the current user is a leader
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('squads')
+        .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    // If the query returns any results, set squadCreated to true
+    if (querySnapshot.docs.isNotEmpty) {
+      setState(() {
+        squadCreated = true;
+      });
+    }
+  }
+
+  // Function to fetch join requests from Firestore
+  void _fetchJoinRequests() async {
+    // Query Firestore for join requests
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('requests')
+        .where('leader_id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('status', isEqualTo: 'pending') // Only fetch pending requests
+        .get();
+
+    // Update joinRequests list with the fetched join requests
+    setState(() {
+      joinRequests = querySnapshot.docs;
+    });
+  }
+
+  // Function to accept a join request
+  void _acceptJoinRequest(QueryDocumentSnapshot request) async {
+    try {
+      // Retrieve the squad document using the squad name from the join request
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('squad_name', isEqualTo: request['squad_name'])
+          .get();
+
+      // Check if the squad document exists
+      if (squadSnapshot.docs.isNotEmpty) {
+        // Get the first document from the snapshot (assuming squad_name is unique)
+        DocumentSnapshot squadDoc = squadSnapshot.docs.first;
+
+        // Update the 'members[]' array of the squad document
+        await squadDoc.reference.update({
+          'members': FieldValue.arrayUnion([request['requester_id']])
+        });
+
+        // Update the status of the join request to 'accepted' in Firestore
+        await request.reference.update({'status': 'accepted'});
+
+        // Fetch updated join requests
+        _fetchJoinRequests();
+
+        // Show a success message or perform any other action
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Join request accepted successfully!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        // Handle the case where the squad document is not found
+        print('Squad document not found.');
+      }
+    } catch (e) {
+      // Handle any errors that occur while accepting the join request
+      print('Error accepting join request: $e');
+    }
+  }
+
+  // Function to deny a join request
+  void _denyJoinRequest(QueryDocumentSnapshot request) async {
+    try {
+      // Update the status of the join request to 'denied' in Firestore
+      await request.reference.update({'status': 'denied'});
+      // Fetch updated join requests
+      _fetchJoinRequests();
+      // Show a success message or perform any other action
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Join request denied successfully!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      // Handle any errors that occur while denying the join request
+      print('Error denying join request: $e');
+    }
+  }
+
+  // Build the join requests dropdown
+  Widget _buildJoinRequestsDropdown() {
+    return Column(
+      children: [
+        // Header for the join requests dropdown
+        const Text(
+          'Join Requests',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18, // Adjust the font size as needed
+            fontWeight: FontWeight.bold, // Optionally, apply bold font weight
+          ),
+        ),
+        // Dropdown for new join requests
+        DropdownButton<QueryDocumentSnapshot>(
+          onChanged: (request) {
+            // Handle dropdown item selection
+            // Here you can choose to accept or deny the selected join request
+            // For simplicity, we'll directly accept or deny it upon selection
+            if (request != null) {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text('Join Request'),
+                  content:
+                      Text('Do you want to accept or deny this join request?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context); // Close the dialog
+                        _acceptJoinRequest(request); // Accept the join request
+                      },
+                      child: Text('Accept'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context); // Close the dialog
+                        _denyJoinRequest(request); // Deny the join request
+                      },
+                      child: Text('Deny'),
+                    ),
+                  ],
+                ),
+              );
+            }
+          },
+          items: joinRequests.map((request) {
+            // Map each join request to a dropdown item
+            return DropdownMenuItem<QueryDocumentSnapshot>(
+              value: request,
+              child: Text(request['requester_id']), // Display requester's ID
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 
   void _createSquad(String squadName, String squadCity) async {
     print("Squad name: $squadName"); // Print squad name for debugging
@@ -26,7 +187,7 @@ class _LeaderPageState extends State<LeaderScreen> {
         if (querySnapshot.docs.isNotEmpty) {
           // If a squad with the same name already exists, show an error message
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('A squad with the same name already exists.'),
               duration: Duration(seconds: 2),
             ),
@@ -41,9 +202,13 @@ class _LeaderPageState extends State<LeaderScreen> {
           });
           // Clear the text field after squad is created
           squadNameController.clear();
+          // Update squad creation status
+          setState(() {
+            squadCreated = true;
+          });
           // Show a success message or perform any other action
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text('Squad created successfully!'),
               duration: Duration(seconds: 2),
             ),
@@ -56,7 +221,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     } else {
       // Show an error message if squad name is empty
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Squad name and city cannot be empty.'),
           duration: Duration(seconds: 2),
         ),
@@ -274,72 +439,77 @@ class _LeaderPageState extends State<LeaderScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                Row(
-                  children: [
-                    // Left text field (2/3 of available space)
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: TextField(
-                          controller: squadNameController,
-                          style: TextStyle(color: Colors.white),
-                          decoration: const InputDecoration(
-                            hintText: 'Create an Emergency Squad',
-                            hintStyle: TextStyle(color: Colors.white),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
+                // Conditional rendering based on squad creation status
+                squadCreated
+                    ? _buildJoinRequestsDropdown()
+                    // If squad is not created, show the squad creation form
+                    : Row(
+                        children: [
+                          // Left text field (2/3 of available space)
+                          Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: TextField(
+                                controller: squadNameController,
+                                style: TextStyle(color: Colors.white),
+                                decoration: const InputDecoration(
+                                  hintText: 'Create an Emergency Squad',
+                                  hintStyle: TextStyle(color: Colors.white),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                ),
+                              ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
+                          ),
+                          // Right text field (1/3 of available space)
+                          Expanded(
+                            flex: 1,
+                            child: TextField(
+                              controller: squadCityController,
+                              style: TextStyle(color: Colors.white),
+                              decoration: const InputDecoration(
+                                hintText: 'City',
+                                hintStyle: TextStyle(color: Colors.white),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                    // Right text field (1/3 of available space)
-                    Expanded(
-                      flex: 1,
-                      child: TextField(
-                        controller: squadCityController,
-                        style: TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          hintText: 'City',
-                          hintStyle: TextStyle(color: Colors.white),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
+                          ElevatedButton(
+                            onPressed: () {
+                              String squadName =
+                                  squadNameController.text.trim();
+                              String squadCity =
+                                  squadCityController.text.trim();
+                              print("Squad name from controller: $squadCity");
+                              _createSquad(squadName, squadCity);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                41,
+                                48,
+                                96,
+                              ), // Set button color to dark red
+                            ),
+                            child: const Text(
+                              'Create',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                        ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: () {
-                    String squadName = squadNameController.text.trim();
-                    String squadCity = squadCityController.text.trim();
-                    print("Squad name from controller: $squadCity");
-                    _createSquad(squadName, squadCity);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(
-                      255,
-                      41,
-                      48,
-                      96,
-                    ), // Set button color to dark red
-                  ),
-                  child: const Text(
-                    'Create',
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
               ],
             ),
           ],

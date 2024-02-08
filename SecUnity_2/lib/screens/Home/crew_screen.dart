@@ -2,6 +2,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CrewScreen extends StatefulWidget {
   @override
@@ -9,7 +10,7 @@ class CrewScreen extends StatefulWidget {
 }
 
 class _CrewPageState extends State<CrewScreen> {
-  // Text controllers and focus node
+  final TextEditingController squadNameController = TextEditingController();
 
   // Helper function to build a checkbox for each time period
   Widget _buildCheckbox(String text) {
@@ -205,7 +206,8 @@ class _CrewPageState extends State<CrewScreen> {
                   ],
                 ),
                 const SizedBox(height: 14),
-                const TextField(
+                TextField(
+                  controller: squadNameController,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Search for an Emergency Squad',
@@ -220,8 +222,92 @@ class _CrewPageState extends State<CrewScreen> {
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle button press
+                  onPressed: () async {
+                    // Get the squad name entered by the user
+                    String squadName = squadNameController.text.trim();
+
+                    // Check if the squad name is not empty
+                    if (squadName.isNotEmpty) {
+                      try {
+                        // Query Firestore to check if a squad with the same name exists
+                        QuerySnapshot querySnapshot = await FirebaseFirestore
+                            .instance
+                            .collection('requests')
+                            .where('squad_name', isEqualTo: squadName)
+                            .where('requester_id',
+                                isEqualTo:
+                                    FirebaseAuth.instance.currentUser!.uid)
+                            .where('status', isEqualTo: 'pending')
+                            .get();
+
+                        // If a pending request already exists
+                        if (querySnapshot.docs.isNotEmpty) {
+                          // Show an error message indicating that the user already has a pending request
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'You already have a pending request for this squad.'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        } else {
+                          // Add a new request only if there is no pending request
+                          // Query Firestore to check if a squad with the same name exists
+                          QuerySnapshot leaderSnapshot = await FirebaseFirestore
+                              .instance
+                              .collection('squads')
+                              .where('squad_name', isEqualTo: squadName)
+                              .get();
+
+                          // If a squad with the same name exists
+                          if (leaderSnapshot.docs.isNotEmpty) {
+                            // Get the leader ID of the existing squad
+                            String leaderId =
+                                leaderSnapshot.docs.first['leader'];
+
+                            // Add a document to the "requests" collection to send a request to the leader
+                            await FirebaseFirestore.instance
+                                .collection('requests')
+                                .add({
+                              'squad_name': squadName,
+                              'requester_id':
+                                  FirebaseAuth.instance.currentUser!.uid,
+                              'leader_id': leaderId,
+                              'status':
+                                  'pending', // Set the initial status of the request
+                            });
+
+                            // Show a success message or perform any other action
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Request sent successfully!'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+                            // If a squad with the same name does not exist, show an error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('No squad with the same name found.'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        // Handle any errors
+                        print('Error: $e');
+                      }
+                    } else {
+                      // Show an error message if the squad name is empty
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Squad name cannot be empty.'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(
