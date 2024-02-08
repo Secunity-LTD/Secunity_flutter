@@ -1,12 +1,15 @@
+// ./screens/Home/crew_screen.dart
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:secunity_2/screens/authenticate/login_screen.dart';
 
-class LeaderScreen extends StatefulWidget {
+class CrewScreen extends StatefulWidget {
   @override
-  _LeaderPageState createState() => _LeaderPageState();
+  _CrewPageState createState() => _CrewPageState();
 }
 
-class _LeaderPageState extends State<LeaderScreen> {
+class _CrewPageState extends State<CrewScreen> {
   // Text controllers and focus node
 
   // Helper function to build a checkbox for each time period
@@ -18,6 +21,8 @@ class _LeaderPageState extends State<LeaderScreen> {
       },
     );
   }
+
+  bool isInPosition = false;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +71,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                       41,
                       48,
                       96,
-                    ), // Set button color to yellow
+                    ),
                   ),
                   child: const Text(
                     'Logout',
@@ -78,26 +83,6 @@ class _LeaderPageState extends State<LeaderScreen> {
               ],
             ),
             const SizedBox(height: 14),
-            ElevatedButton(
-              onPressed: () {
-                // Handle button press
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(
-                  255,
-                  41,
-                  48,
-                  96,
-                ), // Set button color to dark red
-              ),
-              child: const Text(
-                'Edit',
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
             // Column for days table, Real Time Alert button, and additional buttons
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -191,7 +176,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                         ), // Set button color to dark red
                       ),
                       child: const Text(
-                        'Positions',
+                        'Requests',
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -199,18 +184,20 @@ class _LeaderPageState extends State<LeaderScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Handle button press
+                        setState(() {
+                          // Toggle the state variable
+                          isInPosition = !isInPosition;
+                        });
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(
-                          255,
-                          41,
-                          48,
-                          96,
-                        ), // Set button color to dark red
+                        backgroundColor: isInPosition
+                            ? Colors
+                                .green // Change color to green when isInPosition is true
+                            : const Color.fromARGB(255, 41, 48,
+                                96), // Dark red when isInPosition is false
                       ),
                       child: const Text(
-                        'Crew Requests',
+                        'InPosition',
                         style: TextStyle(
                           color: Colors.white,
                         ),
@@ -218,11 +205,11 @@ class _LeaderPageState extends State<LeaderScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 14),
                 const TextField(
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Create an Emergency Squad',
+                    hintText: 'Search for an Emergency Squad',
                     hintStyle: TextStyle(color: Colors.white),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
@@ -246,7 +233,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                     ), // Set button color to dark red
                   ),
                   child: const Text(
-                    'Create',
+                    'Ask for joining',
                     style: TextStyle(
                       color: Colors.white,
                     ),
