@@ -13,6 +13,7 @@ class _LeaderPageState extends State<LeaderScreen> {
 
   void _createSquad(String squadName, String squadCity) async {
     print("Squad name: $squadName"); // Print squad name for debugging
+    print("Leader id: ${FirebaseAuth.instance.currentUser!.uid}");
     // Validate if squad name is not empty
     if (squadName.isNotEmpty && squadCity.isNotEmpty) {
       try {
@@ -33,9 +34,10 @@ class _LeaderPageState extends State<LeaderScreen> {
         } else {
           // Add the squad data to Firestore
           await FirebaseFirestore.instance.collection('squads').add({
-            'name': squadName,
+            'squad_name': squadName,
             'city': squadCity,
-            // Add more squad data as needed
+            'leader': FirebaseAuth.instance.currentUser!.uid,
+            'members': [],
           });
           // Clear the text field after squad is created
           squadNameController.clear();
@@ -55,7 +57,7 @@ class _LeaderPageState extends State<LeaderScreen> {
       // Show an error message if squad name is empty
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Please enter a squad name.'),
+          content: Text('Squad name and city cannot be empty.'),
           duration: Duration(seconds: 2),
         ),
       );

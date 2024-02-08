@@ -38,8 +38,6 @@ class MyApp extends StatelessWidget {
         value: AuthService().onAuthStateChanged,
         builder: (context, snapshot) {
           return MaterialApp(
-            // Set initial route to '/login'
-            initialRoute: '/login',
             // Define routes
             routes: {
               '/login': (context) => SignIn(
