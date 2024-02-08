@@ -32,12 +32,16 @@ class AuthService {
     }
   }
 
-  Future signInAnonymously() async {
-    try {
-      UserCredential result = await _auth.signInAnonymously();
-      User? user = result.user;
+  //sign up with email & password
+  Future signUp(String email, String password) async{
+    try{
+      UserCredential result = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      User user = result.user!;
+
       return _userModelFromFirebase(user);
-    } catch(e){
+    }
+    catch(e){
+      print(e.toString());
       return null;
     }
   }
@@ -53,4 +57,15 @@ class AuthService {
     }
   }
 
+  //sign in anonymously, it's an asynchronous task, it's going to return a future
+  Future signInAnonymously() async{
+    try{
+      UserCredential result = await _auth.signInAnonymously();
+      User user = result.user!;
+      return _userModelFromFirebase(user);
+    }catch(e){
+      print(e.toString());
+      return null;
+    }
+  }
 }
