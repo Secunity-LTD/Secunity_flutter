@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LeaderScreen extends StatefulWidget {
   @override
@@ -7,7 +8,59 @@ class LeaderScreen extends StatefulWidget {
 }
 
 class _LeaderPageState extends State<LeaderScreen> {
-  // Text controllers and focus node
+  final TextEditingController squadNameController = TextEditingController();
+  final TextEditingController squadCityController = TextEditingController();
+
+  void _createSquad(String squadName, String squadCity) async {
+    print("Squad name: $squadName"); // Print squad name for debugging
+    // Validate if squad name is not empty
+    if (squadName.isNotEmpty && squadCity.isNotEmpty) {
+      try {
+        // Check if a squad with the same name already exists
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('squads')
+            .where('name', isEqualTo: squadName)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          // If a squad with the same name already exists, show an error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('A squad with the same name already exists.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          // Add the squad data to Firestore
+          await FirebaseFirestore.instance.collection('squads').add({
+            'name': squadName,
+            'city': squadCity,
+            // Add more squad data as needed
+          });
+          // Clear the text field after squad is created
+          squadNameController.clear();
+          // Show a success message or perform any other action
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Squad created successfully!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        // Handle any errors that occur during squad creation
+        print('Error creating squad: $e');
+      }
+    } else {
+      // Show an error message if squad name is empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please enter a squad name.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
 
   // Helper function to build a checkbox for each time period
   Widget _buildCheckbox(String text) {
@@ -219,23 +272,56 @@ class _LeaderPageState extends State<LeaderScreen> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'Create an Emergency Squad',
-                    hintStyle: TextStyle(color: Colors.white),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                Row(
+                  children: [
+                    // Left text field (2/3 of available space)
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: TextField(
+                          controller: squadNameController,
+                          style: TextStyle(color: Colors.white),
+                          decoration: const InputDecoration(
+                            hintText: 'Create an Emergency Squad',
+                            hintStyle: TextStyle(color: Colors.white),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
+                    // Right text field (1/3 of available space)
+                    Expanded(
+                      flex: 1,
+                      child: TextField(
+                        controller: squadCityController,
+                        style: TextStyle(color: Colors.white),
+                        decoration: const InputDecoration(
+                          hintText: 'City',
+                          hintStyle: TextStyle(color: Colors.white),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: () {
-                    // Handle button press
+                    String squadName = squadNameController.text.trim();
+                    String squadCity = squadCityController.text.trim();
+                    print("Squad name from controller: $squadCity");
+                    _createSquad(squadName, squadCity);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(

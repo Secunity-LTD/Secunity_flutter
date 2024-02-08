@@ -2,7 +2,6 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:secunity_2/screens/authenticate/login_screen.dart';
 
 class CrewScreen extends StatefulWidget {
   @override

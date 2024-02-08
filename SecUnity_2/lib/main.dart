@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
               '/login': (context) => LoginScreen(),
               // Add other routes here
             },
-            home: Wrapper(),
+            home: LeaderScreen(),
           );
         });
   }
