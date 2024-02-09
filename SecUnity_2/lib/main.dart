@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
             // Define routes
             routes: {
               '/login': (context) => SignIn(
-                    toggelView: () {},
+                    toggleView: () {},
                   ),
               '/leader': (context) => LeaderScreen(),
               '/crew': (context) => CrewScreen(),
