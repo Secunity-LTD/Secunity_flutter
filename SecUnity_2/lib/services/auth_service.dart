@@ -52,8 +52,8 @@ class AuthService {
           idToken: googleSignInAuthentication.idToken,
         );
 
-        await _auth.signInWithCredential(credential);
-        Navigator.pushNamed(context, '/leader');
+        UserCredential result = await _auth.signInWithCredential(credential);
+        return _userModelFromFirebase(result.user);
       }
     } catch (e) {
       print(e.toString());

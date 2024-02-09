@@ -96,7 +96,15 @@ class _SignInState extends State<SignIn> {
               SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
-                  _authService.signInWithGoogle(context);
+                  dynamic result = await _authService.signInWithGoogle(context);
+                  if (result == null) {
+                    setState(() {
+                      error = 'Could not sign in with the credentials';
+                    });
+                  } else {
+                    // Navigate to LeaderScreen after successful sign-in
+                    Navigator.pushReplacementNamed(context, '/leader');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   primary: Colors.red, // Change button color to red
