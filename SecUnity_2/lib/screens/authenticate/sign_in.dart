@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:secunity_2/screens/Home/leader_screen.dart'; // Import LeaderScreen
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/constants.dart';
 
 class SignIn extends StatefulWidget {
-  final Function toggelView;
-  SignIn({required this.toggelView});
+  final Function toggleView;
+  SignIn({required this.toggleView});
   @override
   _SignInState createState() => _SignInState();
 }
@@ -30,7 +31,7 @@ class _SignInState extends State<SignIn> {
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
-              widget.toggelView();
+              widget.toggleView();
             },
             style: TextButton.styleFrom(
               primary: secondary,
@@ -91,6 +92,43 @@ class _SignInState extends State<SignIn> {
                     }
                   }
                 },
+              ),
+              SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () async {
+                  dynamic result = await _authService.signInWithGoogle(context);
+                  if (result == null) {
+                    setState(() {
+                      error = 'Could not sign in with the credentials';
+                    });
+                  } else {
+                    // Navigate to LeaderScreen after successful sign-in
+                    Navigator.pushReplacementNamed(context, '/leader');
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.red, // Change button color to red
+                ),
+                child: Container(
+                  child: const Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          FontAwesomeIcons.google,
+                          color: Colors.white, // Change icon color to white
+                        ),
+                        SizedBox(width: 5.0),
+                        Text(
+                          'Sign in with Google',
+                          style: TextStyle(
+                              color:
+                                  Colors.white), // Change text color to white
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
               SizedBox(height: 12.0),
               Text(
