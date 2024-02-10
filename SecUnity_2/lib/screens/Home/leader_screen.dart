@@ -1,5 +1,3 @@
-// /screens/Home/leader_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,7 +21,6 @@ class LeaderStyles {
   );
 
   static TextStyle buttonText = TextStyle(
-    // Define buttonText TextStyle
     color: Colors.white,
   );
 
@@ -56,6 +53,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     _checkIfLeader();
     _fetchJoinRequests();
     _initializeTaskControllers();
+    _loadTasks();
   }
 
   void _checkIfLeader() async {
@@ -81,13 +79,67 @@ class _LeaderPageState extends State<LeaderScreen> {
     });
   }
 
-  void _initializeTaskControllers() {
-    taskControllers = List.generate(7, (_) => []);
-    for (int i = 0; i < 7; i++) {
-      for (int j = 0; j < 3; j++) {
-        taskControllers[i].add(TextEditingController());
+  void _initializeTaskControllers() async {
+    try {
+      // Fetching squad ID where current user is the leader
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      // Initialize the taskControllers list if it's null or empty
+      if (taskControllers == null || taskControllers.isEmpty) {
+        taskControllers = List.generate(
+            7, (_) => List.generate(3, (_) => TextEditingController()));
       }
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        // Getting the ID of the first squad (assuming user can lead only one squad)
+        String squadId = squadSnapshot.docs.first.id;
+
+        for (int i = 0; i < 7; i++) {
+          for (int j = 0; j < 3; j++) {
+            String day = _getDayName(i);
+            String time = _getTimeName(j);
+            DocumentSnapshot taskSnapshot = await FirebaseFirestore.instance
+                .collection('squad_tasks')
+                .doc(
+                    '$day-$time-$squadId') // Using squad ID in task document ID
+                .get();
+
+            if (taskSnapshot.exists) {
+              Map<String, dynamic>? data =
+                  taskSnapshot.data() as Map<String, dynamic>?;
+
+              if (data != null && data.containsKey('task')) {
+                taskControllers[i][j] =
+                    TextEditingController(text: data['task']);
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error initializing task controllers: $e');
     }
+  }
+
+  String _getDayName(int index) {
+    List<String> days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return days[index];
+  }
+
+  String _getTimeName(int index) {
+    List<String> times = ['Morning', 'Evening', 'Night'];
+    return times[index];
   }
 
   void _acceptJoinRequest(QueryDocumentSnapshot request) async {
@@ -271,8 +323,12 @@ class _LeaderPageState extends State<LeaderScreen> {
             SizedBox(height: 14),
             ElevatedButton(
               onPressed: () {
-                _toggleEdit();
-                // Handle button press
+                // check if the leader has already created a squad
+                if (squadCreated) {
+                  _toggleEdit();
+                } else {
+                  _showSnackBar('Create a squad first.');
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: LeaderStyles.buttonColor,
@@ -450,6 +506,81 @@ class _LeaderPageState extends State<LeaderScreen> {
           borderSide: BorderSide(color: Colors.white),
         ),
       ),
+      onChanged: (_) {
+        if (_isEditing) {
+          _saveTasks();
+        }
+      },
     );
+  }
+
+  // Function to save all tasks for the squad in a single document
+  void _saveTasks() async {
+    try {
+      // Fetching squad ID where current user is the leader
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        String squadId = squadSnapshot.docs.first.id;
+        DocumentReference squadTasksRef =
+            FirebaseFirestore.instance.collection('squad_tasks').doc(squadId);
+
+        Map<String, dynamic> tasksData = {};
+        for (int i = 0; i < 7; i++) {
+          for (int j = 0; j < 3; j++) {
+            String day = _getDayName(i);
+            String time = _getTimeName(j);
+            tasksData['$day-$time'] = taskControllers[i][j].text;
+          }
+        }
+
+        await squadTasksRef.set(tasksData);
+        _showSnackBar('Tasks saved successfully!');
+      }
+    } catch (e) {
+      print('Error saving tasks: $e');
+    }
+  }
+
+  // Function to load tasks for the squad when logging in
+  void _loadTasks() async {
+    try {
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        String squadId = squadSnapshot.docs.first.id;
+        DocumentSnapshot tasksSnapshot = await FirebaseFirestore.instance
+            .collection('squad_tasks')
+            .doc(squadId)
+            .get();
+
+        if (tasksSnapshot.exists) {
+          Map<String, dynamic>? tasksData =
+              tasksSnapshot.data() as Map<String, dynamic>?;
+
+          if (tasksData != null) {
+            for (int i = 0; i < 7; i++) {
+              for (int j = 0; j < 3; j++) {
+                String day = _getDayName(i);
+                String time = _getTimeName(j);
+                String taskKey = '$day-$time';
+
+                if (tasksData.containsKey(taskKey)) {
+                  taskControllers[i][j].text = tasksData[taskKey];
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error loading tasks: $e');
+    }
   }
 }
