@@ -2,6 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:secunity_2/models/UserModel.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter/material.dart';
+import 'crew_database.dart';
+import 'leader_database.dart';
+
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -62,11 +65,18 @@ class AuthService {
   }
 
   //sign up with email & password
-  Future signUp(String email, String password) async {
+  Future signUp(String firsName, String lastName, String role, String email, String password, String userType) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User user = result.user!;
+      // create a new document for the user with the uid
+      if(userType == '1'){
+        await LeaderDatabaseService(uid: user.uid).insertUserToData(firsName, lastName, role);
+      }
+      else{
+        await CrewDatabaseService(uid: user.uid).inserteToUserData(firsName, lastName, role);
+      }
 
       return _userModelFromFirebase(user);
     }
