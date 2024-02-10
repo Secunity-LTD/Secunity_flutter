@@ -5,37 +5,37 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LeaderStyles {
-  static const TextStyle headerText = TextStyle(
+  static TextStyle headerText = TextStyle(
     color: Colors.white,
     fontSize: 20,
   );
 
-  static const TextStyle dropdownItemText = TextStyle(
+  static TextStyle dropdownItemText = TextStyle(
     color: Colors.white,
   );
 
-  static const TextStyle tableHeaderText = TextStyle(
+  static TextStyle tableHeaderText = TextStyle(
     color: Colors.white,
   );
 
-  static const TextStyle snackBarText = TextStyle(
+  static TextStyle snackBarText = TextStyle(
     color: Colors.white,
   );
 
-  static const TextStyle buttonText = TextStyle(
+  static TextStyle buttonText = TextStyle(
     // Define buttonText TextStyle
     color: Colors.white,
   );
 
-  static const Color buttonColor = Color.fromARGB(255, 41, 48, 96);
+  static Color buttonColor = Color.fromARGB(255, 41, 48, 96);
 
-  static const Color backgroundColor1 = Color.fromARGB(255, 130, 120, 200);
-  static const Color backgroundColor2 = Color.fromARGB(255, 70, 80, 150);
-  static const Color backgroundColor3 = Color.fromARGB(255, 50, 70, 130);
-  static const Color backgroundColor4 = Color.fromARGB(255, 30, 52, 100);
-  static const Color backgroundColor5 = Color.fromARGB(255, 9, 13, 47);
+  static Color backgroundColor1 = Color.fromARGB(255, 130, 120, 200);
+  static Color backgroundColor2 = Color.fromARGB(255, 70, 80, 150);
+  static Color backgroundColor3 = Color.fromARGB(255, 50, 70, 130);
+  static Color backgroundColor4 = Color.fromARGB(255, 30, 52, 100);
+  static Color backgroundColor5 = Color.fromARGB(255, 9, 13, 47);
 
-  static const Color alertButtonColor = Color.fromARGB(255, 139, 0, 0);
+  static Color alertButtonColor = Color.fromARGB(255, 139, 0, 0);
 }
 
 class LeaderScreen extends StatefulWidget {
@@ -220,11 +220,15 @@ class _LeaderPageState extends State<LeaderScreen> {
     });
   }
 
+  String getEditButtonText() {
+    return _isEditing ? 'Save' : 'Edit';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
               LeaderStyles.backgroundColor1,
@@ -237,15 +241,15 @@ class _LeaderPageState extends State<LeaderScreen> {
             end: Alignment.bottomCenter,
           ),
         ),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Hello',
                   style: LeaderStyles.headerText,
                 ),
@@ -257,14 +261,14 @@ class _LeaderPageState extends State<LeaderScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: LeaderStyles.buttonColor,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Logout',
                     style: LeaderStyles.headerText,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14),
             ElevatedButton(
               onPressed: () {
                 _toggleEdit();
@@ -273,17 +277,17 @@ class _LeaderPageState extends State<LeaderScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: LeaderStyles.buttonColor,
               ),
-              child: const Text(
-                'Edit',
+              child: Text(
+                getEditButtonText(),
                 style: LeaderStyles.buttonText, // Use buttonText style here
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Table(
-                  columnWidths: const {
+                  columnWidths: {
                     0: FlexColumnWidth(1.5),
                     1: FlexColumnWidth(2),
                     2: FlexColumnWidth(2),
@@ -291,7 +295,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                   },
                   border: TableBorder.all(color: Colors.white),
                   children: [
-                    const TableRow(
+                    TableRow(
                       children: [
                         Center(
                             child: Text('Days',
@@ -320,7 +324,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                       ),
                   ],
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 ElevatedButton(
                   onPressed: () {
                     // Handle Real Time Alert button press
@@ -328,12 +332,12 @@ class _LeaderPageState extends State<LeaderScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: LeaderStyles.alertButtonColor,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Real Time Alert',
                     style: LeaderStyles.buttonText, // Use buttonText style here
                   ),
                 ),
-                const SizedBox(height: 14),
+                SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -344,7 +348,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: LeaderStyles.buttonColor,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Positions',
                         style: LeaderStyles
                             .buttonText, // Use buttonText style here
@@ -357,7 +361,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: LeaderStyles.buttonColor,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Crew Requests',
                         style: LeaderStyles
                             .buttonText, // Use buttonText style here
@@ -365,7 +369,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
                 squadCreated
                     ? _buildJoinRequestsDropdown()
                     : Row(
@@ -373,11 +377,11 @@ class _LeaderPageState extends State<LeaderScreen> {
                           Expanded(
                             flex: 2,
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
+                              padding: EdgeInsets.only(right: 8.0),
                               child: TextField(
                                 controller: squadNameController,
                                 style: TextStyle(color: Colors.white),
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   hintText: 'Create an Emergency Squad',
                                   hintStyle: TextStyle(color: Colors.white),
                                   enabledBorder: OutlineInputBorder(
@@ -395,7 +399,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                             child: TextField(
                               controller: squadCityController,
                               style: TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: 'City',
                                 hintStyle: TextStyle(color: Colors.white),
                                 enabledBorder: OutlineInputBorder(
@@ -415,7 +419,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: LeaderStyles.buttonColor,
                             ),
-                            child: const Text(
+                            child: Text(
                               'Create',
                               style: LeaderStyles
                                   .buttonText, // Use buttonText style here
