@@ -330,14 +330,6 @@ class _SignUpState extends State<SignUp> {
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 setState(() => loading = true);
-                print(lastName);
-                print(firstName);
-                print(role);
-                print(email);
-                print(password);
-                print(confirmPassword);
-                print(role);
-                print(userType);
                 dynamic result = await _authService.signUp(firstName, lastName, role, email, password, userType);
                 if (result == null) {
                   setState(() {

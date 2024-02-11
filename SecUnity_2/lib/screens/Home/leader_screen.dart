@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:secunity_2/models/leader_user.dart';
+import 'package:secunity_2/services/leader_database.dart';
+
+import '../../models/UserModel.dart';
+import '../../services/auth_service.dart';
 
 class LeaderStyles {
   static TextStyle headerText = TextStyle(
@@ -222,7 +228,7 @@ class _LeaderPageState extends State<LeaderScreen> {
       ],
     );
   }
-
+  // Create new Team method
   void _createSquad(String squadName, String squadCity) async {
     if (squadName.isNotEmpty && squadCity.isNotEmpty) {
       try {
@@ -275,170 +281,199 @@ class _LeaderPageState extends State<LeaderScreen> {
   String getEditButtonText() {
     return _isEditing ? 'Save' : 'Edit';
   }
+  final AuthService _authService = AuthService();
+  final _formKey = GlobalKey<FormState>();
+
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              LeaderStyles.backgroundColor1,
-              LeaderStyles.backgroundColor2,
-              LeaderStyles.backgroundColor3,
-              LeaderStyles.backgroundColor4,
-              LeaderStyles.backgroundColor5,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Hello',
-                  style: LeaderStyles.headerText,
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: LeaderStyles.buttonColor,
-                  ),
-                  child: Text(
-                    'Logout',
-                    style: LeaderStyles.headerText,
+    final userModel = Provider.of<UserModel?>(context);
+    
+    // return StreamBuilder<UserModel>(
+    //   stream: LeaderDatabaseService(uid: userModel!.uid).userData,
+    //   builder: (context, snapshot) {
+    //     if(snapshot.hasData){
+    //       UserData userData = snapshot.data;
+
+          return Scaffold(
+              body: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      LeaderStyles.backgroundColor1,
+                      LeaderStyles.backgroundColor2,
+                      LeaderStyles.backgroundColor3,
+                      LeaderStyles.backgroundColor4,
+                      LeaderStyles.backgroundColor5,
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 14),
-            ElevatedButton(
-              onPressed: () {
-                // check if the leader has already created a squad
-                if (squadCreated) {
-                  _toggleEdit();
-                } else {
-                  _showSnackBar('Create a squad first.');
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: LeaderStyles.buttonColor,
-              ),
-              child: Text(
-                getEditButtonText(),
-                style: LeaderStyles.buttonText, // Use buttonText style here
-              ),
-            ),
-            SizedBox(height: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Table(
-                  columnWidths: {
-                    0: FlexColumnWidth(1.5),
-                    1: FlexColumnWidth(2),
-                    2: FlexColumnWidth(2),
-                    3: FlexColumnWidth(2),
-                  },
-                  border: TableBorder.all(color: Colors.white),
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TableRow(
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Center(
-                            child: Text('Days',
-                                style: LeaderStyles.tableHeaderText)),
-                        Center(
-                            child: Text('Morning',
-                                style: LeaderStyles.tableHeaderText)),
-                        Center(
-                            child: Text('Evening',
-                                style: LeaderStyles.tableHeaderText)),
-                        Center(
-                            child: Text('Night',
-                                style: LeaderStyles.tableHeaderText)),
+                        Text(
+                          'Hello',
+                          style: LeaderStyles.headerText,
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            await FirebaseAuth.instance.signOut();
+                            Navigator.pushNamed(context, '/login');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: LeaderStyles.buttonColor,
+                          ),
+                          child: Text(
+                            'Logout',
+                            style: LeaderStyles.headerText,
+                          ),
+                        ),
                       ],
                     ),
-                    for (var dayIndex = 0; dayIndex < 7; dayIndex++)
-                      TableRow(
-                        children: [
-                          Center(
-                              child: Text('Monday',
-                                  style: LeaderStyles.tableHeaderText)),
-                          _buildTaskTextField(dayIndex, 0),
-                          _buildTaskTextField(dayIndex, 1),
-                          _buildTaskTextField(dayIndex, 2),
-                        ],
-                      ),
-                  ],
-                ),
-                SizedBox(height: 14),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle Real Time Alert button press
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: LeaderStyles.alertButtonColor,
-                  ),
-                  child: Text(
-                    'Real Time Alert',
-                    style: LeaderStyles.buttonText, // Use buttonText style here
-                  ),
-                ),
-                SizedBox(height: 14),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
+                    SizedBox(height: 14),
                     ElevatedButton(
                       onPressed: () {
-                        // Handle button press
+                        // check if the leader has already created a squad
+                        if (squadCreated) {
+                          _toggleEdit();
+                        } else {
+                          _showSnackBar('Create a squad first.');
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: LeaderStyles.buttonColor,
                       ),
                       child: Text(
-                        'Positions',
-                        style: LeaderStyles
-                            .buttonText, // Use buttonText style here
+                        getEditButtonText(),
+                        style: LeaderStyles.buttonText, // Use buttonText style here
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle button press
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: LeaderStyles.buttonColor,
-                      ),
-                      child: Text(
-                        'Crew Requests',
-                        style: LeaderStyles
-                            .buttonText, // Use buttonText style here
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20),
-                squadCreated
-                    ? _buildJoinRequestsDropdown()
-                    : Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: EdgeInsets.only(right: 8.0),
+                    SizedBox(height: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Table(
+                          columnWidths: {
+                            0: FlexColumnWidth(1.5),
+                            1: FlexColumnWidth(2),
+                            2: FlexColumnWidth(2),
+                            3: FlexColumnWidth(2),
+                          },
+                          border: TableBorder.all(color: Colors.white),
+                          children: [
+                            TableRow(
+                              children: [
+                                Center(
+                                    child: Text('Days',
+                                        style: LeaderStyles.tableHeaderText)),
+                                Center(
+                                    child: Text('Morning',
+                                        style: LeaderStyles.tableHeaderText)),
+                                Center(
+                                    child: Text('Evening',
+                                        style: LeaderStyles.tableHeaderText)),
+                                Center(
+                                    child: Text('Night',
+                                        style: LeaderStyles.tableHeaderText)),
+                              ],
+                            ),
+                            for (var dayIndex = 0; dayIndex < 7; dayIndex++)
+                              TableRow(
+                                children: [
+                                  Center(
+                                      child: Text('Monday',
+                                          style: LeaderStyles.tableHeaderText)),
+                                  _buildTaskTextField(dayIndex, 0),
+                                  _buildTaskTextField(dayIndex, 1),
+                                  _buildTaskTextField(dayIndex, 2),
+                                ],
+                              ),
+                          ],
+                        ),
+                        SizedBox(height: 14),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Handle Real Time Alert button press
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: LeaderStyles.alertButtonColor,
+                          ),
+                          child: Text(
+                            'Real Time Alert',
+                            style: LeaderStyles.buttonText, // Use buttonText style here
+                          ),
+                        ),
+                        SizedBox(height: 14),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                // Handle button press
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: LeaderStyles.buttonColor,
+                              ),
+                              child: Text(
+                                'Positions',
+                                style: LeaderStyles
+                                    .buttonText, // Use buttonText style here
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Handle button press
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: LeaderStyles.buttonColor,
+                              ),
+                              child: Text(
+                                'Crew Requests',
+                                style: LeaderStyles
+                                    .buttonText, // Use buttonText style here
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        squadCreated
+                            ? _buildJoinRequestsDropdown()
+                            : Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 8.0),
+                                child: TextField(
+                                  controller: squadNameController,
+                                  style: TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    hintText: 'Create an Emergency Squad',
+                                    hintStyle: TextStyle(color: Colors.white),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.white),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
                               child: TextField(
-                                controller: squadNameController,
+                                controller: squadCityController,
                                 style: TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
-                                  hintText: 'Create an Emergency Squad',
+                                  hintText: 'City',
                                   hintStyle: TextStyle(color: Colors.white),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(color: Colors.white),
@@ -449,45 +484,29 @@ class _LeaderPageState extends State<LeaderScreen> {
                                 ),
                               ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: TextField(
-                              controller: squadCityController,
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                hintText: 'City',
-                                hintStyle: TextStyle(color: Colors.white),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
+                            ElevatedButton(
+                              onPressed: () {
+                                _createSquad(squadNameController.text.trim(),
+                                    squadCityController.text.trim());
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: LeaderStyles.buttonColor,
+                              ),
+                              child: Text(
+                                'Create',
+                                style: LeaderStyles
+                                    .buttonText, // Use buttonText style here
                               ),
                             ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              _createSquad(squadNameController.text.trim(),
-                                  squadCityController.text.trim());
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: LeaderStyles.buttonColor,
-                            ),
-                            child: Text(
-                              'Create',
-                              style: LeaderStyles
-                                  .buttonText, // Use buttonText style here
-                            ),
-                          ),
-                        ],
-                      ),
-              ],
-            ),
-          ],
-        ),
-      ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+      }
     );
   }
 
