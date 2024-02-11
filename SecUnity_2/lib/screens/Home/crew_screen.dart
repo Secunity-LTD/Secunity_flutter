@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:secunity_2/services/auth_service.dart';
 
 class CrewScreen extends StatefulWidget {
   @override
@@ -11,6 +12,7 @@ class CrewScreen extends StatefulWidget {
 
 class _CrewPageState extends State<CrewScreen> {
   final TextEditingController squadNameController = TextEditingController();
+  final AuthService _authService = AuthService();
 
   // Helper function to build a checkbox for each time period
   Widget _buildCheckbox(String text) {
@@ -23,6 +25,49 @@ class _CrewPageState extends State<CrewScreen> {
   }
 
   bool isInPosition = false;
+
+  void TogglePosition() async {
+    try {
+      // Query squads where members array contains the current user's ID
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('members',
+              arrayContains: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        String squadId = squadSnapshot.docs.first.id;
+
+        // Get the reference to the squad document
+        DocumentReference squadRef =
+            FirebaseFirestore.instance.collection('squads').doc(squadId);
+
+        // Get the current members array
+        DocumentSnapshot squadDoc = await squadRef.get();
+        List<dynamic> members =
+            (squadDoc.data() as Map<String, dynamic>)['members'];
+
+        // Find the index of the current user's ID in the members array
+        int index = members.indexWhere((element) =>
+            element['requester_id'] == FirebaseAuth.instance.currentUser!.uid);
+
+        if (index != -1) {
+          // Update the status for the current user
+          members[index]['status'] =
+              isInPosition ? 'In Position' : 'Not In Position';
+
+          // Update the 'members' field in the squad document with the modified array
+          await squadRef.update({'members': members});
+          print('Position updated successfully!');
+        }
+      }
+      setState(() {
+        isInPosition = !isInPosition;
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +106,9 @@ class _CrewPageState extends State<CrewScreen> {
                 ElevatedButton(
                   onPressed: () async {
                     // Sign out the current user
-                    await FirebaseAuth.instance.signOut();
+                    _authService.signOut(context);
+
                     // Navigate to the login screen
-                    Navigator.pushNamed(context, '/login');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(
@@ -184,9 +229,7 @@ class _CrewPageState extends State<CrewScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          isInPosition = !isInPosition;
-                        });
+                        TogglePosition();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isInPosition

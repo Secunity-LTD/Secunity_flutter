@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:secunity_2/services/auth_service.dart';
 
 class LeaderStyles {
   static TextStyle headerText = TextStyle(
@@ -46,6 +47,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   bool squadCreated = false;
   List<QueryDocumentSnapshot> joinRequests = [];
   List<List<TextEditingController>> taskControllers = [];
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -151,11 +153,25 @@ class _LeaderPageState extends State<LeaderScreen> {
 
       if (squadSnapshot.docs.isNotEmpty) {
         DocumentSnapshot squadDoc = squadSnapshot.docs.first;
+
+        // Construct a map with key-value pairs
+        Map<String, dynamic> memberData = {
+          'requester_id': request['requester_id'],
+          'status': 'Not In Position'
+        };
+
+        // Add the map to the 'members' array field using FieldValue.arrayUnion
         await squadDoc.reference.update({
-          'members': FieldValue.arrayUnion([request['requester_id']])
+          'members': FieldValue.arrayUnion([memberData])
         });
+
+        // Update the status of the join request
         await request.reference.update({'status': 'accepted'});
+
+        // Fetch and update join requests
         _fetchJoinRequests();
+
+        // Show a snackbar message
         _showSnackBar('Join request accepted successfully!');
       } else {
         print('Squad document not found.');
@@ -307,8 +323,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    Navigator.pushNamed(context, '/login');
+                    _authService.signOut(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: LeaderStyles.buttonColor,
