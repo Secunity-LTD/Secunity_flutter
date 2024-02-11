@@ -43,13 +43,13 @@ class AuthService {
 
     try {
       final GoogleSignInAccount? googleSignInAccount =
-          await _googleSignIn.signIn();
+          await _googleSignIn.signIn(); 
 
-      if (googleSignInAccount != null) {
+      if (googleSignInAccount != null) { 
         final GoogleSignInAuthentication googleSignInAuthentication =
             await googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
+        final AuthCredential credential = GoogleAuthProvider.credential( 
           accessToken: googleSignInAuthentication.accessToken,
           idToken: googleSignInAuthentication.idToken,
         );
