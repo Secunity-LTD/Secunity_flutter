@@ -64,20 +64,21 @@ class AuthService {
   }
 
   //sign up with email & password
-  Future signUp(String firsName, String lastName, String role, String email,
+  Future signUp(String firsName, String lastName, String dropdownValueTeam, String email,
       String password, String userType) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
           email: email, password: password);
       User user = result.user!;
       // create a new document for the user with the uid
-      if (userType == '1') {
+      if (userType == 'Team leader') {
         await LeaderDatabaseService(uid: user.uid)
-            .insertUserToData(firsName, lastName, role);
-      } else {
+            .insertUserToData(firsName, lastName, dropdownValueTeam);
+      } else if (userType == 'Crew member'){
         await CrewDatabaseService(uid: user.uid)
-            .inserteToUserData(firsName, lastName, role);
+            .inserteToUserData(firsName, lastName, dropdownValueTeam);
       }
+
 
       return _userModelFromFirebase(user);
     }
