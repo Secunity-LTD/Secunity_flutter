@@ -204,7 +204,6 @@ class _SignUpState extends State<SignUp> {
   String userType = '0';
   String firstName = '';
   String lastName = '';
-  String role = '';
   String dropdownValue = 'Role';
   String dropdownValueTeam = 'Type';
 
@@ -348,7 +347,7 @@ class _SignUpState extends State<SignUp> {
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 setState(() => loading = true);
-                dynamic result = await _authService.signUp(firstName, lastName, role, email, password, userType);
+                dynamic result = await _authService.signUp(firstName, lastName, dropdownValue, email, password, dropdownValueTeam);
                 if (result == null) {
                   setState(() {
                     error = 'Please provide a valid email';

@@ -28,11 +28,11 @@ class _CrewPageState extends State<CrewScreen> {
 
   void TogglePosition() async {
     try {
-      // Query squads where members array contains the current user's ID
+      // Query Firestore to get the squad document where the current user is a member
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
           .collection('squads')
-          .where('members',
-              arrayContains: FirebaseAuth.instance.currentUser!.uid)
+          .where('members.requester_id',
+              isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .get();
 
       if (squadSnapshot.docs.isNotEmpty) {
@@ -56,11 +56,19 @@ class _CrewPageState extends State<CrewScreen> {
           members[index]['status'] =
               isInPosition ? 'In Position' : 'Not In Position';
 
-          // Update the 'members' field in the squad document with the modified array
-          await squadRef.update({'members': members});
+          // Create a new map with the updated members array
+          Map<String, dynamic> updatedData = {'members': members};
+
+          // Update the 'members' field in the squad document
+          await squadRef.update(updatedData);
           print('Position updated successfully!');
+        } else {
+          print('User not found in the members array.');
         }
+      } else {
+        print('You are not a member of any squad.');
       }
+
       setState(() {
         isInPosition = !isInPosition;
       });
