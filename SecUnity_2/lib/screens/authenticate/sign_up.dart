@@ -253,16 +253,21 @@ class _SignUpState extends State<SignUp> {
               setState(() => lastName = value);
             },
           ),
-          SizedBox(height: 10.0),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Role',
-            ),
-            validator: (value) => value!.isEmpty ? 'Enter your role' : null,
-            onChanged: (value) {
-              setState(() => role = value);
-            },
-          ),
+        DropdownButton<String>(
+          value: 'Medic', // Default value
+          onChanged: (String? newValue) {
+            // Handle dropdown value change
+            print(newValue);
+          },
+          items: <String>['Medic', 'Sniper','Negev']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(value),
+            );
+          }).toList(),
+        ),
+
           SizedBox(height: 10.0),
           TextFormField(
             decoration: InputDecoration(
@@ -302,22 +307,21 @@ class _SignUpState extends State<SignUp> {
               setState(() => confirmPassword = value);
             },
           ),
-          SizedBox(height: 10.0),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Type of user (1 for Team Leader, 2 for Crew Member)',
-            ),
-            validator: (value) {
-              if (value != '1' && value != '2') {
-                return 'Type is not valid';
-              }
-              return null;
+          DropdownButton<String>(
+            value: 'Team leader', // Default value
+            onChanged: (String? newValue) {
+              // Handle dropdown value change
+              print(newValue);
             },
-            obscureText: false,
-            onChanged: (value) {
-              setState(() => userType = value);
-            },
+            items: <String>['Team leader', 'Crew member']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
           ),
+
           SizedBox(height: 10.0),
           ElevatedButton(
             style: ButtonStyle(
