@@ -1,45 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
-import 'package:secunity_2/models/leader_user.dart';
-import 'package:secunity_2/services/leader_database.dart';
+import 'package:secunity_2/services/auth_service.dart';
 
-import '../../models/UserModel.dart';
-import '../../services/auth_service.dart';
-
-class LeaderStyles {
-  static TextStyle headerText = TextStyle(
-    color: Colors.white,
-    fontSize: 20,
-  );
-
-  static TextStyle dropdownItemText = TextStyle(
-    color: Colors.white,
-  );
-
-  static TextStyle tableHeaderText = TextStyle(
-    color: Colors.white,
-  );
-
-  static TextStyle snackBarText = TextStyle(
-    color: Colors.white,
-  );
-
-  static TextStyle buttonText = TextStyle(
-    color: Colors.white,
-  );
-
-  static Color buttonColor = Color.fromARGB(255, 41, 48, 96);
-
-  static Color backgroundColor1 = Color.fromARGB(255, 130, 120, 200);
-  static Color backgroundColor2 = Color.fromARGB(255, 70, 80, 150);
-  static Color backgroundColor3 = Color.fromARGB(255, 50, 70, 130);
-  static Color backgroundColor4 = Color.fromARGB(255, 30, 52, 100);
-  static Color backgroundColor5 = Color.fromARGB(255, 9, 13, 47);
-
-  static Color alertButtonColor = Color.fromARGB(255, 139, 0, 0);
-}
+import '../../constants/leader_style.dart';
 
 class LeaderScreen extends StatefulWidget {
   @override
@@ -52,6 +16,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   bool squadCreated = false;
   List<QueryDocumentSnapshot> joinRequests = [];
   List<List<TextEditingController>> taskControllers = [];
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
@@ -157,11 +122,25 @@ class _LeaderPageState extends State<LeaderScreen> {
 
       if (squadSnapshot.docs.isNotEmpty) {
         DocumentSnapshot squadDoc = squadSnapshot.docs.first;
+
+        // Construct a map with key-value pairs
+        Map<String, dynamic> memberData = {
+          'requester_id': request['requester_id'],
+          'status': 'Not In Position'
+        };
+
+        // Add the map to the 'members' array field using FieldValue.arrayUnion
         await squadDoc.reference.update({
-          'members': FieldValue.arrayUnion([request['requester_id']])
+          'members': FieldValue.arrayUnion([memberData])
         });
+
+        // Update the status of the join request
         await request.reference.update({'status': 'accepted'});
+
+        // Fetch and update join requests
         _fetchJoinRequests();
+
+        // Show a snackbar message
         _showSnackBar('Join request accepted successfully!');
       } else {
         print('Squad document not found.');
@@ -228,7 +207,7 @@ class _LeaderPageState extends State<LeaderScreen> {
       ],
     );
   }
-  // Create new Team method
+
   void _createSquad(String squadName, String squadCity) async {
     if (squadName.isNotEmpty && squadCity.isNotEmpty) {
       try {
@@ -281,199 +260,169 @@ class _LeaderPageState extends State<LeaderScreen> {
   String getEditButtonText() {
     return _isEditing ? 'Save' : 'Edit';
   }
-  final AuthService _authService = AuthService();
-  final _formKey = GlobalKey<FormState>();
-
 
   @override
   Widget build(BuildContext context) {
-    final userModel = Provider.of<UserModel?>(context);
-    
-    // return StreamBuilder<UserModel>(
-    //   stream: LeaderDatabaseService(uid: userModel!.uid).userData,
-    //   builder: (context, snapshot) {
-    //     if(snapshot.hasData){
-    //       UserData userData = snapshot.data;
-
-          return Scaffold(
-              body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      LeaderStyles.backgroundColor1,
-                      LeaderStyles.backgroundColor2,
-                      LeaderStyles.backgroundColor3,
-                      LeaderStyles.backgroundColor4,
-                      LeaderStyles.backgroundColor5,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              LeaderStyles.backgroundColor1,
+              LeaderStyles.backgroundColor2,
+              LeaderStyles.backgroundColor3,
+              LeaderStyles.backgroundColor4,
+              LeaderStyles.backgroundColor5,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Hello',
+                  style: LeaderStyles.headerText,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    _authService.signOut(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LeaderStyles.buttonColor,
+                  ),
+                  child: Text(
+                    'Logout',
+                    style: LeaderStyles.headerText,
                   ),
                 ),
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              ],
+            ),
+            SizedBox(height: 14),
+            ElevatedButton(
+              onPressed: () {
+                // check if the leader has already created a squad
+                if (squadCreated) {
+                  _toggleEdit();
+                } else {
+                  _showSnackBar('Create a squad first.');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: LeaderStyles.buttonColor,
+              ),
+              child: Text(
+                getEditButtonText(),
+                style: LeaderStyles.buttonText, // Use buttonText style here
+              ),
+            ),
+            SizedBox(height: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Table(
+                  columnWidths: {
+                    0: FlexColumnWidth(1.5),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2),
+                    3: FlexColumnWidth(2),
+                  },
+                  border: TableBorder.all(color: Colors.white),
                   children: [
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    TableRow(
                       children: [
-                        Text(
-                          'Hello',
-                          style: LeaderStyles.headerText,
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.pushNamed(context, '/login');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: LeaderStyles.buttonColor,
-                          ),
-                          child: Text(
-                            'Logout',
-                            style: LeaderStyles.headerText,
-                          ),
-                        ),
+                        Center(
+                            child: Text('Days',
+                                style: LeaderStyles.tableHeaderText)),
+                        Center(
+                            child: Text('Morning',
+                                style: LeaderStyles.tableHeaderText)),
+                        Center(
+                            child: Text('Evening',
+                                style: LeaderStyles.tableHeaderText)),
+                        Center(
+                            child: Text('Night',
+                                style: LeaderStyles.tableHeaderText)),
                       ],
                     ),
-                    SizedBox(height: 14),
+                    for (var dayIndex = 0; dayIndex < 7; dayIndex++)
+                      TableRow(
+                        children: [
+                          Center(
+                              child: Text('Monday',
+                                  style: LeaderStyles.tableHeaderText)),
+                          _buildTaskTextField(dayIndex, 0),
+                          _buildTaskTextField(dayIndex, 1),
+                          _buildTaskTextField(dayIndex, 2),
+                        ],
+                      ),
+                  ],
+                ),
+                SizedBox(height: 14),
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle Real Time Alert button press
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: LeaderStyles.alertButtonColor,
+                  ),
+                  child: Text(
+                    'Real Time Alert',
+                    style: LeaderStyles.buttonText, // Use buttonText style here
+                  ),
+                ),
+                SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
                     ElevatedButton(
                       onPressed: () {
-                        // check if the leader has already created a squad
-                        if (squadCreated) {
-                          _toggleEdit();
-                        } else {
-                          _showSnackBar('Create a squad first.');
-                        }
+                        // Handle button press
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: LeaderStyles.buttonColor,
                       ),
                       child: Text(
-                        getEditButtonText(),
-                        style: LeaderStyles.buttonText, // Use buttonText style here
+                        'Positions',
+                        style: LeaderStyles
+                            .buttonText, // Use buttonText style here
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Table(
-                          columnWidths: {
-                            0: FlexColumnWidth(1.5),
-                            1: FlexColumnWidth(2),
-                            2: FlexColumnWidth(2),
-                            3: FlexColumnWidth(2),
-                          },
-                          border: TableBorder.all(color: Colors.white),
-                          children: [
-                            TableRow(
-                              children: [
-                                Center(
-                                    child: Text('Days',
-                                        style: LeaderStyles.tableHeaderText)),
-                                Center(
-                                    child: Text('Morning',
-                                        style: LeaderStyles.tableHeaderText)),
-                                Center(
-                                    child: Text('Evening',
-                                        style: LeaderStyles.tableHeaderText)),
-                                Center(
-                                    child: Text('Night',
-                                        style: LeaderStyles.tableHeaderText)),
-                              ],
-                            ),
-                            for (var dayIndex = 0; dayIndex < 7; dayIndex++)
-                              TableRow(
-                                children: [
-                                  Center(
-                                      child: Text('Monday',
-                                          style: LeaderStyles.tableHeaderText)),
-                                  _buildTaskTextField(dayIndex, 0),
-                                  _buildTaskTextField(dayIndex, 1),
-                                  _buildTaskTextField(dayIndex, 2),
-                                ],
-                              ),
-                          ],
-                        ),
-                        SizedBox(height: 14),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Handle Real Time Alert button press
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: LeaderStyles.alertButtonColor,
-                          ),
-                          child: Text(
-                            'Real Time Alert',
-                            style: LeaderStyles.buttonText, // Use buttonText style here
-                          ),
-                        ),
-                        SizedBox(height: 14),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                // Handle button press
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: LeaderStyles.buttonColor,
-                              ),
-                              child: Text(
-                                'Positions',
-                                style: LeaderStyles
-                                    .buttonText, // Use buttonText style here
-                              ),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                // Handle button press
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: LeaderStyles.buttonColor,
-                              ),
-                              child: Text(
-                                'Crew Requests',
-                                style: LeaderStyles
-                                    .buttonText, // Use buttonText style here
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20),
-                        squadCreated
-                            ? _buildJoinRequestsDropdown()
-                            : Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Padding(
-                                padding: EdgeInsets.only(right: 8.0),
-                                child: TextField(
-                                  controller: squadNameController,
-                                  style: TextStyle(color: Colors.white),
-                                  decoration: InputDecoration(
-                                    hintText: 'Create an Emergency Squad',
-                                    hintStyle: TextStyle(color: Colors.white),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.white),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderSide: BorderSide(color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle button press
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: LeaderStyles.buttonColor,
+                      ),
+                      child: Text(
+                        'Crew Requests',
+                        style: LeaderStyles
+                            .buttonText, // Use buttonText style here
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                squadCreated
+                    ? _buildJoinRequestsDropdown()
+                    : Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 8.0),
                               child: TextField(
-                                controller: squadCityController,
+                                controller: squadNameController,
                                 style: TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
-                                  hintText: 'City',
+                                  hintText: 'Create an Emergency Squad',
                                   hintStyle: TextStyle(color: Colors.white),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(color: Colors.white),
@@ -484,29 +433,45 @@ class _LeaderPageState extends State<LeaderScreen> {
                                 ),
                               ),
                             ),
-                            ElevatedButton(
-                              onPressed: () {
-                                _createSquad(squadNameController.text.trim(),
-                                    squadCityController.text.trim());
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: LeaderStyles.buttonColor,
-                              ),
-                              child: Text(
-                                'Create',
-                                style: LeaderStyles
-                                    .buttonText, // Use buttonText style here
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: TextField(
+                              controller: squadCityController,
+                              style: TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: 'City',
+                                hintStyle: TextStyle(color: Colors.white),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.white),
+                                ),
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-      }
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _createSquad(squadNameController.text.trim(),
+                                  squadCityController.text.trim());
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: LeaderStyles.buttonColor,
+                            ),
+                            child: Text(
+                              'Create',
+                              style: LeaderStyles
+                                  .buttonText, // Use buttonText style here
+                            ),
+                          ),
+                        ],
+                      ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 

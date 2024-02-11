@@ -5,7 +5,7 @@ import 'package:secunity_2/services/team_service.dart';
 import '../../constants/constants.dart';
 
 class CreateTeam extends StatefulWidget {
-  const CreateTeam({Key? key}) : super(key: key);
+  // const CreateTeam({Key? key}) : super(key: key);
 
   @override
   _CreateTeamState createState() => _CreateTeamState();
