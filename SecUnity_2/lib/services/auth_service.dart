@@ -92,8 +92,9 @@ class AuthService {
   }
 
   //sing out
-  Future signOut() async {
+  Future signOut(context) async {
     try {
+      Navigator.pushNamed(context, '/login');
       return await _auth.signOut();
     } catch (e) {
       print(e.toString());
@@ -112,4 +113,7 @@ class AuthService {
       return null;
     }
   }
+
+  
+  
 }
