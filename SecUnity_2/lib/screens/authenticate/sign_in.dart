@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:secunity_2/screens/Home/leader_screen.dart'; // Import LeaderScreen
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/constants.dart';
 
 class SignIn extends StatefulWidget {
-  final Function toggelView;
-  SignIn({required this.toggelView});
+  final Function toggleView;
+  SignIn({required this.toggleView});
   @override
   _SignInState createState() => _SignInState();
 }
@@ -13,6 +15,7 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email']); // Google Sign-In instance
 
   // text field state
   String error = "";
@@ -30,7 +33,7 @@ class _SignInState extends State<SignIn> {
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
-              widget.toggelView();
+              widget.toggleView();
             },
             style: TextButton.styleFrom(
               primary: secondary,
@@ -93,6 +96,13 @@ class _SignInState extends State<SignIn> {
                 },
               ),
               SizedBox(height: 12.0),
+              ElevatedButton(
+                onPressed: () {
+                  _handleGoogleSignIn();
+                },
+                child: Text('Sign in with Google'),
+              ),
+              SizedBox(height: 12.0),
               Text(
                 error,
                 style: TextStyle(color: errorColor, fontSize: 14.0),
@@ -102,5 +112,33 @@ class _SignInState extends State<SignIn> {
         ),
       ),
     );
+  }
+
+  // Function to handle Google Sign-In with Firebase Authentication
+  Future<void> _handleGoogleSignIn() async {
+    try {
+      final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+      if (googleSignInAccount != null) {
+        final GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+        final User? user = userCredential.user;
+
+        if (user != null) {
+          print('Google Sign-In successful. User UID: ${user.uid}');
+          // Proceed with your application logic after successful sign-in
+          // For example, you can navigate to a new screen or update UI
+        } else {
+          print('Google Sign-In failed.');
+        }
+      } else {
+        print('Google Sign-In canceled.');
+      }
+    } catch (error) {
+      print('Error signing in with Google: $error');
+    }
   }
 }
