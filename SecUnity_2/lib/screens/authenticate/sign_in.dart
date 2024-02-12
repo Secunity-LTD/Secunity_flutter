@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:secunity_2/screens/Home/leader_screen.dart'; // Import LeaderScreen
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/constants.dart';
+import 'package:secunity_2/screens/home/home.dart';
 
 class SignIn extends StatefulWidget {
   final Function toggleView;
@@ -11,7 +11,7 @@ class SignIn extends StatefulWidget {
   _SignInState createState() => _SignInState();
 }
 
-class _SignInState extends State<SignIn> {
+class _SignInState extends State<SignIn>  {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
@@ -89,7 +89,12 @@ class _SignInState extends State<SignIn> {
                       });
                     } else {
                       // Navigate to LeaderScreen after successful sign-in
-                      Navigator.pushReplacementNamed(context, '/leader');
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Home(),
+                        ),
+                      );
                     }
                   }
                 },

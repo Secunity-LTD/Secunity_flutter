@@ -1,11 +1,12 @@
 import 'package:secunity_2/models/UserModel.dart';
 
-class UserData extends UserModel {
+class CrewUser extends UserModel{
   final String firstName;
   final String lastName;
   final String role;
+  bool hasTeam = false;
 
-  UserData({
+  CrewUser({
     required String uid,
     required this.firstName,
     required this.lastName,

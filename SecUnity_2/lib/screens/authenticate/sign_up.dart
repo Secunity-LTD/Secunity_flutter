@@ -204,7 +204,9 @@ class _SignUpState extends State<SignUp> {
   String userType = '0';
   String firstName = '';
   String lastName = '';
-  String role = '';
+  String dropdownValue = 'Role';
+  String dropdownValueTeam = 'Type';
+
 
   @override
   Widget build(BuildContext context) {
@@ -243,6 +245,7 @@ class _SignUpState extends State<SignUp> {
               setState(() => firstName = value);
             },
           ),
+
           SizedBox(height: 10.0),
           TextFormField(
             decoration: InputDecoration(
@@ -253,20 +256,25 @@ class _SignUpState extends State<SignUp> {
               setState(() => lastName = value);
             },
           ),
-        DropdownButton<String>(
-          value: 'Medic', // Default value
-          onChanged: (String? newValue) {
-            // Handle dropdown value change
-            print(newValue);
-          },
-          items: <String>['Medic', 'Sniper','Negev']
-              .map<DropdownMenuItem<String>>((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-        ),
+          DropdownButton<String>(
+            value: dropdownValue, // Default value
+            onChanged: (String? newValue) {
+              // Update dropdown value
+              setState(() {
+                dropdownValue = newValue!;
+              });
+              // Handle any other actions
+              print(newValue);
+            },
+            items: <String>['Role','Medic', 'Sniper','Negev']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+
 
           SizedBox(height: 10.0),
           TextFormField(
@@ -308,12 +316,16 @@ class _SignUpState extends State<SignUp> {
             },
           ),
           DropdownButton<String>(
-            value: 'Team leader', // Default value
+            value: dropdownValueTeam, // Default value
             onChanged: (String? newValue) {
-              // Handle dropdown value change
+              // Update dropdown value
+              setState(() {
+                dropdownValueTeam = newValue!;
+              });
+              // Handle any other actions
               print(newValue);
             },
-            items: <String>['Team leader', 'Crew member']
+            items: <String>['Type','Team leader', 'Crew member']
                 .map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
@@ -321,6 +333,7 @@ class _SignUpState extends State<SignUp> {
               );
             }).toList(),
           ),
+
 
           SizedBox(height: 10.0),
           ElevatedButton(
@@ -334,15 +347,7 @@ class _SignUpState extends State<SignUp> {
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 setState(() => loading = true);
-                print(lastName);
-                print(firstName);
-                print(role);
-                print(email);
-                print(password);
-                print(confirmPassword);
-                print(role);
-                print(userType);
-                dynamic result = await _authService.signUp(firstName, lastName, role, email, password, userType);
+                dynamic result = await _authService.signUp(firstName, lastName, dropdownValue, email, password, dropdownValueTeam);
                 if (result == null) {
                   setState(() {
                     error = 'Please provide a valid email';
