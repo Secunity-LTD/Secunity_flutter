@@ -9,7 +9,7 @@ import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:secunity_2/screens/authenticate/login_screen.dart';
-import 'package:secunity_2/screens/authenticate/sign_in.dart';
+import 'package:secunity_2/screens/authenticate/sign_up.dart';
 
 import 'models/UserModel.dart';
 
@@ -41,6 +41,8 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             // Define routes
             routes: {
+              '/sign_up': (context) => SignUp(toggleView: () {}), // Assuming SignUp is your sign-up page widget
+              '/sign_in': (context) => SignIn(toggleView: () {}), // Your sign-in page widget
               '/login': (context) => SignIn(
                     toggleView: () {},
                   ),

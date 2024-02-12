@@ -28,6 +28,7 @@ class _HomeState extends State<Home> {
 
   Future<void> _navigateToInitialScreen() async {
     try {
+      print("Tring to connect");
       // Query the 'leaders' collection to check if the user is a leader
       DocumentSnapshot leaderSnapshot = await FirebaseFirestore.instance
           .collection('leaders')
