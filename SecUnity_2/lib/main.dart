@@ -41,7 +41,6 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             // Define routes
             routes: {
-              // '/sign_up_gmail': (context) => SignUpGmail(toggleView: (){}),
               '/login': (context) => SignIn(
                     toggleView: () {},
                   ),
