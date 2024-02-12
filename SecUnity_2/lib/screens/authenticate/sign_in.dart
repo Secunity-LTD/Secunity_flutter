@@ -109,7 +109,13 @@ class _SignInState extends State<SignIn>  {
                     });
                   } else {
                     // Navigate to LeaderScreen after successful sign-in
-                    Navigator.pushReplacementNamed(context, '/crew');
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => Home(),
+                        )
+                      ,);
+                    // Navigator.pushReplacementNamed(context, '/crew');
                   }
                 },
                 style: ElevatedButton.styleFrom(
