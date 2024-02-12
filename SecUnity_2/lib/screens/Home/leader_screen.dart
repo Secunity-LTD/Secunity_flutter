@@ -322,7 +322,7 @@ class _LeaderPageState extends State<LeaderScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Hello $firstName!',
+                  'Hello $firstName !',
                   style: LeaderStyles.headerText,
                 ),
                 ElevatedButton(

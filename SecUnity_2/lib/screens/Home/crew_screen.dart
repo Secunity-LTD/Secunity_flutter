@@ -127,7 +127,7 @@ class _CrewPageState extends State<CrewScreen> {
               children: [
                 // top left text
                 Text(
-                  'Hello $firstName',
+                  'Hello $firstName !',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,
