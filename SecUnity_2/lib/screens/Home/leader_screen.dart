@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/services/auth_service.dart';
+import 'package:provider/provider.dart';
+import 'package:secunity_2/models/userModel.dart';
 
 import '../../constants/leader_style.dart';
 import '../../services/team_service.dart';
 
-
-
 class LeaderScreen extends StatefulWidget {
-
   @override
   _LeaderPageState createState() => _LeaderPageState();
 }
@@ -33,15 +32,30 @@ class _LeaderPageState extends State<LeaderScreen> {
     _loadTasks();
   }
 
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: LeaderStyles.snackBarText),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
   void _checkIfLeader() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('squads')
-        .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+    // check if 'has a team' field is true in the leader's document
+    DocumentSnapshot leaderSnapshot = await FirebaseFirestore.instance
+        .collection('leaders')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .get();
 
-    setState(() {
-      squadCreated = querySnapshot.docs.isNotEmpty;
-    });
+    if (leaderSnapshot.exists) {
+      bool hasTeam = leaderSnapshot['has a team'];
+      if (hasTeam) {
+        setState(() {
+          squadCreated = hasTeam;
+        });
+      }
+    }
   }
 
   void _fetchJoinRequests() async {
@@ -214,47 +228,6 @@ class _LeaderPageState extends State<LeaderScreen> {
     );
   }
 
-  void _createSquad(String squadName, String squadCity) async {
-    if (squadName.isNotEmpty && squadCity.isNotEmpty) {
-      try {
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('squads')
-            .where('name', isEqualTo: squadName)
-            .get();
-
-        if (querySnapshot.docs.isNotEmpty) {
-          _showSnackBar('A squad with the same name already exists.');
-        } else {
-          await FirebaseFirestore.instance.collection('squads').add({
-            'squad_name': squadName,
-            'city': squadCity,
-            'leader': FirebaseAuth.instance.currentUser!.uid,
-            'members': [],
-            'alert': false,
-          });
-          squadNameController.clear();
-          setState(() {
-            squadCreated = true;
-          });
-          _showSnackBar('Squad created successfully!');
-        }
-      } catch (e) {
-        print('Error creating squad: $e');
-      }
-    } else {
-      _showSnackBar('Squad name and city cannot be empty.');
-    }
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: LeaderStyles.snackBarText),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
   bool _isEditing = false;
 
   void _toggleEdit() {
@@ -269,6 +242,7 @@ class _LeaderPageState extends State<LeaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModel = Provider.of<UserModel?>(context);
     final user = this.user;
     if (user != null) {
       leaderUid = user.uid;
@@ -464,10 +438,13 @@ class _LeaderPageState extends State<LeaderScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              _teamService.createTeam(squadNameController.text.trim(),
-                                  squadCityController.text.trim());
-                              // _createSquad(squadNameController.text.trim(),
-                              //     squadCityController.text.trim());
+                              _teamService.createTeam(
+                                  squadNameController.text.trim(),
+                                  squadCityController.text.trim(),
+                                  context);
+                              setState(() {
+                                squadCreated = true;
+                              });
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: LeaderStyles.buttonColor,
