@@ -49,8 +49,16 @@ class _HomeState extends State<Home> {
         } else {
           // User not found in either 'leaders' or 'crew' collection
           // You may want to handle this case accordingly, e.g., navigate to a sign-in screen
+
+
+          // MaterialPageRoute(builder: (context) => LeaderScreen());
           print("User not found in leaders or crew collection");
           print("Your ID is: ${FirebaseAuth.instance.currentUser!.uid}");
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => CrewScreen()),
+          );
         }
       }
     } catch (e) {
