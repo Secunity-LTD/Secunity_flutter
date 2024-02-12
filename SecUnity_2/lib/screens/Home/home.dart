@@ -5,7 +5,14 @@ import 'package:secunity_2/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../authenticate/sign_up_gmail.dart';
+
 class Home extends StatefulWidget {
+  final String? email;
+  final String? password;
+
+  Home({this.email, this.password});
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -21,6 +28,7 @@ class _HomeState extends State<Home> {
 
   Future<void> _navigateToInitialScreen() async {
     try {
+      print("Tring to connect");
       // Query the 'leaders' collection to check if the user is a leader
       DocumentSnapshot leaderSnapshot = await FirebaseFirestore.instance
           .collection('leaders')
@@ -49,8 +57,30 @@ class _HomeState extends State<Home> {
         } else {
           // User not found in either 'leaders' or 'crew' collection
           // You may want to handle this case accordingly, e.g., navigate to a sign-in screen
+
+
+          // If email and password are provided, perform a sign-in process
+          if (widget.email != null && widget.password != null) {
+            // Perform sign-in process using widget.email and widget.password
+            // Example: AuthService.signIn(widget.email, widget.password);
+            print(widget.email);
+            print(widget.password);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => SignUpGmail(toggleView: (){})),
+            );  
+          } else {
+            // Do something else if email and password are not provided
+          }
+
+          // MaterialPageRoute(builder: (context) => LeaderScreen());
           print("User not found in leaders or crew collection");
           print("Your ID is: ${FirebaseAuth.instance.currentUser!.uid}");
+
+          // Navigator.pushReplacement(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => CrewScreen()),
+          // );
         }
       }
     } catch (e) {

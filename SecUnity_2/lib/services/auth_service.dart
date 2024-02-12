@@ -79,7 +79,33 @@ class AuthService {
             .inserteToUserData(firsName, lastName, dropdownValueTeam);
       }
 
+      
+      return _userModelFromFirebase(user);
+    }
+    // if the email exists return 1, else return null
+    catch (e) {
+      print(e.toString());
+      if (e.toString().contains('email-already-in-use')) {
+        return 1;
+      }
+      return null;
+    }
+  }
 
+  //sign up with email & password
+  Future SignUpGmail(String firsName, String lastName, String dropdownValueTeam, String userType) async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // create a new document for the user with the uid
+        if (userType == 'Team leader') {
+          await LeaderDatabaseService(uid: user.uid)
+              .insertUserToData(firsName, lastName, dropdownValueTeam);
+        } else if (userType == 'Crew member') {
+          await CrewDatabaseService(uid: user.uid)
+              .inserteToUserData(firsName, lastName, dropdownValueTeam);
+        }
+      }
       return _userModelFromFirebase(user);
     }
     // if the email exists return 1, else return null
@@ -95,8 +121,9 @@ class AuthService {
   //sing out
   Future signOut(context) async {
     try {
+      await _auth.signOut();
       Navigator.pushNamed(context, '/login');
-      return await _auth.signOut();
+      return null;
     } catch (e) {
       print(e.toString());
       return null;

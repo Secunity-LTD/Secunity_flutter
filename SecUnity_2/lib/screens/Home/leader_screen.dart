@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/services/auth_service.dart';
+import 'package:provider/provider.dart';
+import 'package:secunity_2/models/userModel.dart';
 
 import '../../constants/leader_style.dart';
 import '../../services/team_service.dart';
 
-
-
 class LeaderScreen extends StatefulWidget {
-
   @override
   _LeaderPageState createState() => _LeaderPageState();
 }
@@ -23,6 +22,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   final AuthService _authService = AuthService();
   User? user = FirebaseAuth.instance.currentUser;
   String leaderUid = '';
+  String firstName = '';
 
   @override
   void initState() {
@@ -31,17 +31,50 @@ class _LeaderPageState extends State<LeaderScreen> {
     _fetchJoinRequests();
     _initializeTaskControllers();
     _loadTasks();
+    _fetchUserName();
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: LeaderStyles.snackBarText),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Future<void> _fetchUserName() async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('leaders')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (userSnapshot.exists) {
+        setState(() {
+          firstName = userSnapshot['first name'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+    }
   }
 
   void _checkIfLeader() async {
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('squads')
-        .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+    // check if 'has a team' field is true in the leader's document
+    DocumentSnapshot leaderSnapshot = await FirebaseFirestore.instance
+        .collection('leaders')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .get();
 
-    setState(() {
-      squadCreated = querySnapshot.docs.isNotEmpty;
-    });
+    if (leaderSnapshot.exists) {
+      bool hasTeam = leaderSnapshot['has a team'];
+      if (hasTeam) {
+        setState(() {
+          squadCreated = hasTeam;
+        });
+      }
+    }
   }
 
   void _fetchJoinRequests() async {
@@ -173,86 +206,76 @@ class _LeaderPageState extends State<LeaderScreen> {
           'Join Requests',
           style: LeaderStyles.headerText,
         ),
-        DropdownButton<QueryDocumentSnapshot>(
-          onChanged: (request) async {
-            if (request != null) {
-              await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Join Request'),
-                  content:
-                      Text('Do you want to accept or deny this join request?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () =>
-                          {_acceptJoinRequest(request), Navigator.pop(context)},
-                      child:
-                          Text('Accept', style: LeaderStyles.dropdownItemText),
-                    ),
-                    TextButton(
-                      onPressed: () => {
-                        _denyJoinRequest(request),
-                        Navigator.pop(context),
-                      },
-                      child: Text('Deny', style: LeaderStyles.dropdownItemText),
-                    ),
-                  ],
-                ),
+        FutureBuilder<List<DropdownMenuItem<QueryDocumentSnapshot>>>(
+          future: _fetchJoinRequestsDropdownItems(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              return DropdownButton<QueryDocumentSnapshot>(
+                onChanged: (request) async {
+                  if (request != null) {
+                    await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Join Request'),
+                        content: Text(
+                            'Do you want to accept or deny this join request?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => {
+                              _acceptJoinRequest(request),
+                              Navigator.pop(context)
+                            },
+                            child: Text('Accept',
+                                style: LeaderStyles.dropdownItemText),
+                          ),
+                          TextButton(
+                            onPressed: () => {
+                              _denyJoinRequest(request),
+                              Navigator.pop(context),
+                            },
+                            child: Text('Deny',
+                                style: LeaderStyles.dropdownItemText),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+                items: snapshot.data!,
               );
             }
           },
-          items: joinRequests.map((request) {
-            return DropdownMenuItem<QueryDocumentSnapshot>(
-              value: request,
-              child: Text(
-                request['requester_id'],
-              ),
-            );
-          }).toList(),
         ),
       ],
     );
   }
 
-  void _createSquad(String squadName, String squadCity) async {
-    if (squadName.isNotEmpty && squadCity.isNotEmpty) {
-      try {
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('squads')
-            .where('name', isEqualTo: squadName)
-            .get();
-
-        if (querySnapshot.docs.isNotEmpty) {
-          _showSnackBar('A squad with the same name already exists.');
-        } else {
-          await FirebaseFirestore.instance.collection('squads').add({
-            'squad_name': squadName,
-            'city': squadCity,
-            'leader': FirebaseAuth.instance.currentUser!.uid,
-            'members': [],
-            'alert': false,
-          });
-          squadNameController.clear();
-          setState(() {
-            squadCreated = true;
-          });
-          _showSnackBar('Squad created successfully!');
-        }
-      } catch (e) {
-        print('Error creating squad: $e');
-      }
-    } else {
-      _showSnackBar('Squad name and city cannot be empty.');
+  Future<List<DropdownMenuItem<QueryDocumentSnapshot>>>
+      _fetchJoinRequestsDropdownItems() async {
+    List<DropdownMenuItem<QueryDocumentSnapshot>> dropdownItems = [];
+    for (var request in joinRequests) {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('crew')
+          .doc(request['requester_id'])
+          .get();
+      final userData = userSnapshot.data() as Map<String, dynamic>;
+      final firstName = userData[
+          'first name']; // Assuming the firstName field exists in your user document
+      final lastName = userData[
+          'last name']; // Assuming the lastName field exists in your user document
+      final fullName = '$firstName $lastName';
+      dropdownItems.add(
+        DropdownMenuItem<QueryDocumentSnapshot>(
+          value: request,
+          child: Text(fullName),
+        ),
+      );
     }
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: LeaderStyles.snackBarText),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    return dropdownItems;
   }
 
   bool _isEditing = false;
@@ -269,6 +292,7 @@ class _LeaderPageState extends State<LeaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModel = Provider.of<UserModel?>(context);
     final user = this.user;
     if (user != null) {
       leaderUid = user.uid;
@@ -298,7 +322,7 @@ class _LeaderPageState extends State<LeaderScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Hello',
+                  'Hello $firstName !',
                   style: LeaderStyles.headerText,
                 ),
                 ElevatedButton(
@@ -464,10 +488,13 @@ class _LeaderPageState extends State<LeaderScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              _teamService.createTeam(squadNameController.text.trim(),
-                                  squadCityController.text.trim());
-                              // _createSquad(squadNameController.text.trim(),
-                              //     squadCityController.text.trim());
+                              _teamService.createTeam(
+                                  squadNameController.text.trim(),
+                                  squadCityController.text.trim(),
+                                  context);
+                              setState(() {
+                                squadCreated = true;
+                              });
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: LeaderStyles.buttonColor,

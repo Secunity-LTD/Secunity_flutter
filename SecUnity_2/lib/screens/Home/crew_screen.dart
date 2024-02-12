@@ -13,6 +13,7 @@ class CrewScreen extends StatefulWidget {
 class _CrewPageState extends State<CrewScreen> {
   final TextEditingController squadNameController = TextEditingController();
   final AuthService _authService = AuthService();
+  String firstName = '';
 
   // Helper function to build a checkbox for each time period
   Widget _buildCheckbox(String text) {
@@ -24,7 +25,29 @@ class _CrewPageState extends State<CrewScreen> {
     );
   }
 
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
   bool isInPosition = false;
+
+  Future<void> _fetchUserName() async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('crew')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (userSnapshot.exists) {
+        setState(() {
+          firstName = userSnapshot['first name'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+    }
+  }
 
   void TogglePosition() async {
     try {
@@ -103,8 +126,8 @@ class _CrewPageState extends State<CrewScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // top left text
-                const Text(
-                  'Hello',
+                Text(
+                  'Hello $firstName !',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 20,

@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:secunity_2/screens/authenticate/sign_up.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/constants.dart';
 import 'package:secunity_2/screens/home/home.dart';
@@ -32,7 +34,11 @@ class _SignInState extends State<SignIn>  {
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
-              widget.toggleView();
+              // widget.toggleView();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SignUp(toggleView: (){})),
+              );
             },
             style: TextButton.styleFrom(
               primary: secondary,
@@ -102,14 +108,37 @@ class _SignInState extends State<SignIn>  {
               SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
+                  print("talor");
                   dynamic result = await _authService.signInWithGoogle(context);
+                  print("yogev");
                   if (result == null) {
                     setState(() {
                       error = 'Could not sign in with the credentials';
                     });
                   } else {
-                    // Navigate to LeaderScreen after successful sign-in
-                    Navigator.pushReplacementNamed(context, '/crew');
+                    // You can also access the user's email directly from Firebase Authentication
+                    User? firebaseUser = FirebaseAuth.instance.currentUser;
+                    if (firebaseUser != null) {
+                      String email = firebaseUser.email!;
+                      // Now, you have the user's email.
+                      print("natali");
+                      // Extract email and password from the result if available
+                      // String? password = result['password'];
+                      print("start");
+                      print(email);
+                      print(password);
+                      print("end");
+                      // Navigate to Home screen and pass email and password as parameters
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Home(email: email, password: '123456'),
+                        ),
+                      );
+                    }
+
+
+                    // Navigator.pushReplacementNamed(context, '/crew');
                   }
                 },
                 style: ElevatedButton.styleFrom(

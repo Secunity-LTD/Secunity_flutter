@@ -1,6 +1,6 @@
 import 'package:secunity_2/models/UserModel.dart';
 
-class LeaderUser extends UserModel {
+class LeaderUser {
   final String firstName;
   final String lastName;
   final String role;
@@ -11,7 +11,7 @@ class LeaderUser extends UserModel {
     required this.firstName,
     required this.lastName,
     required this.role,
-  }) : super(uid: uid);
+  });
 }
 
 
