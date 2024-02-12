@@ -22,6 +22,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   final AuthService _authService = AuthService();
   User? user = FirebaseAuth.instance.currentUser;
   String leaderUid = '';
+  String firstName = '';
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     _fetchJoinRequests();
     _initializeTaskControllers();
     _loadTasks();
+    _fetchUserName();
   }
 
   void _showSnackBar(String message) {
@@ -39,6 +41,23 @@ class _LeaderPageState extends State<LeaderScreen> {
         duration: Duration(seconds: 2),
       ),
     );
+  }
+
+  Future<void> _fetchUserName() async {
+    try {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('crew')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (userSnapshot.exists) {
+        setState(() {
+          firstName = userSnapshot['first name'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+    }
   }
 
   void _checkIfLeader() async {
@@ -187,45 +206,76 @@ class _LeaderPageState extends State<LeaderScreen> {
           'Join Requests',
           style: LeaderStyles.headerText,
         ),
-        DropdownButton<QueryDocumentSnapshot>(
-          onChanged: (request) async {
-            if (request != null) {
-              await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: Text('Join Request'),
-                  content:
-                      Text('Do you want to accept or deny this join request?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () =>
-                          {_acceptJoinRequest(request), Navigator.pop(context)},
-                      child:
-                          Text('Accept', style: LeaderStyles.dropdownItemText),
-                    ),
-                    TextButton(
-                      onPressed: () => {
-                        _denyJoinRequest(request),
-                        Navigator.pop(context),
-                      },
-                      child: Text('Deny', style: LeaderStyles.dropdownItemText),
-                    ),
-                  ],
-                ),
+        FutureBuilder<List<DropdownMenuItem<QueryDocumentSnapshot>>>(
+          future: _fetchJoinRequestsDropdownItems(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else {
+              return DropdownButton<QueryDocumentSnapshot>(
+                onChanged: (request) async {
+                  if (request != null) {
+                    await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('Join Request'),
+                        content: Text(
+                            'Do you want to accept or deny this join request?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => {
+                              _acceptJoinRequest(request),
+                              Navigator.pop(context)
+                            },
+                            child: Text('Accept',
+                                style: LeaderStyles.dropdownItemText),
+                          ),
+                          TextButton(
+                            onPressed: () => {
+                              _denyJoinRequest(request),
+                              Navigator.pop(context),
+                            },
+                            child: Text('Deny',
+                                style: LeaderStyles.dropdownItemText),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+                items: snapshot.data!,
               );
             }
           },
-          items: joinRequests.map((request) {
-            return DropdownMenuItem<QueryDocumentSnapshot>(
-              value: request,
-              child: Text(
-                request['requester_id'],
-              ),
-            );
-          }).toList(),
         ),
       ],
     );
+  }
+
+  Future<List<DropdownMenuItem<QueryDocumentSnapshot>>>
+      _fetchJoinRequestsDropdownItems() async {
+    List<DropdownMenuItem<QueryDocumentSnapshot>> dropdownItems = [];
+    for (var request in joinRequests) {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('crew')
+          .doc(request['requester_id'])
+          .get();
+      final userData = userSnapshot.data() as Map<String, dynamic>;
+      final firstName = userData[
+          'first name']; // Assuming the firstName field exists in your user document
+      final lastName = userData[
+          'last name']; // Assuming the lastName field exists in your user document
+      final fullName = '$firstName $lastName';
+      dropdownItems.add(
+        DropdownMenuItem<QueryDocumentSnapshot>(
+          value: request,
+          child: Text(fullName),
+        ),
+      );
+    }
+    return dropdownItems;
   }
 
   bool _isEditing = false;
@@ -272,7 +322,7 @@ class _LeaderPageState extends State<LeaderScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Hello',
+                  'Hello $firstName!',
                   style: LeaderStyles.headerText,
                 ),
                 ElevatedButton(
