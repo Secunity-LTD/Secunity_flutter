@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:secunity_2/screens/authenticate/sign_in.dart';
 import '../../constants/constants.dart';
 import '../../services/auth_service.dart';
 
@@ -37,7 +38,11 @@ class _SignUpState extends State<SignUp> {
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
-              widget.toggleView();
+              // widget.toggleView();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SignIn(toggleView: (){})),
+              );
             },
             style: TextButton.styleFrom(primary: secondary),
             icon: Icon(Icons.person),

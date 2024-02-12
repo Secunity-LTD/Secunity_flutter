@@ -121,8 +121,9 @@ class AuthService {
   //sing out
   Future signOut(context) async {
     try {
+      await _auth.signOut();
       Navigator.pushNamed(context, '/login');
-      return await _auth.signOut();
+      return null;
     } catch (e) {
       print(e.toString());
       return null;

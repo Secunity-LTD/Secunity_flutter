@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:secunity_2/screens/authenticate/sign_up.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/constants.dart';
 import 'package:secunity_2/screens/home/home.dart';
@@ -33,7 +34,11 @@ class _SignInState extends State<SignIn>  {
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
-              widget.toggleView();
+              // widget.toggleView();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SignUp(toggleView: (){})),
+              );
             },
             style: TextButton.styleFrom(
               primary: secondary,
