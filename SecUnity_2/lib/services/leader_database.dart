@@ -1,27 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/models/UserModel.dart';
-import 'package:secunity_2/services/team_database.dart';
+// import 'package:secunity_2/services/team_database.dart';
 
 import '../models/leader_user.dart';
-
 
 class LeaderDatabaseService {
   final String uid;
   LeaderDatabaseService({required this.uid});
   // collection reference
-  final CollectionReference leadersCollection = FirebaseFirestore.instance.collection('leaders');
+  final CollectionReference leadersCollection =
+      FirebaseFirestore.instance.collection('leaders');
 
-
-  Future insertUserToData(String firstName, String lastName, String role) async{
+  Future insertUserToData(
+      String firstName, String lastName, String role) async {
     return await leadersCollection.doc(uid).set({
       'first name': firstName,
       'last name': lastName,
       'role': role,
-      'team uid': null,
+      'has a team': false
     });
   }
 
-  Future updateUserData(String firstName, String lastName, String role) async{
+  Future updateUserData(String firstName, String lastName, String role) async {
     return await leadersCollection.doc(uid).set({
       'first name': firstName,
       'last name': lastName,
@@ -29,7 +29,11 @@ class LeaderDatabaseService {
     });
   }
 
-
+  Future updateLeaderState(bool state) async {
+    return await leadersCollection.doc(uid).update({
+      'has a team': state,
+    });
+  }
 
   // // user data from snapshots
   // UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
@@ -74,26 +78,28 @@ class LeaderDatabaseService {
   // user data from snapshots
   UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
     // Check if the snapshot contains data and data exists
-    if (snapshot.exists) {
-      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+    // if (snapshot.exists) {
+    Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
 
-      // Access data using keys
-      String firstName = data['first name'] ?? '';
-      String lastName = data['last name'] ?? '';
-      String role = data['role'] ?? '';
+    // Access data using keys
+    String firstName = data['first name'] ?? '';
+    String lastName = data['last name'] ?? '';
+    String role = data['role'] ?? '';
+    bool hasTeam = data['has a team'] ?? '';
 
-      return UserData(
-        uid: uid,
-        firstName: firstName,
-        lastName: lastName,
-        role: role,
-      );
-    } else {
-      // Handle the case where the document doesn't exist
-      return UserData(uid: uid, firstName: '', lastName: '', role: '');
-    }
+    return UserData(
+      uid: uid,
+      firstName: firstName,
+      lastName: lastName,
+      role: role,
+      hasTeam: hasTeam,
+    );
+    // } else {
+    // Handle the case where the document doesn't exist
+    // return UserData(
+    //     uid: uid, firstName: '', lastName: '', role: '', hasTeam: false);
+    // }
   }
-
 
   // // get user doc stream
   // Stream<LeaderUser> get userData {
@@ -106,8 +112,8 @@ class LeaderDatabaseService {
   //   return leadersCollection.doc(uid).snapshots()
   //       .map(_userDataFromSnapshot);
   // }
-// // get user doc stream
-//   Stream<DocumentSnapshot> get userData {
-//     return leadersCollection.doc(uid).snapshots().map(_userDataFromSnapshot);
-//   }
+// get user doc stream
+  Stream<UserData>? get userData {
+    return leadersCollection.doc(uid).snapshots().map(_userDataFromSnapshot);
+  }
 }

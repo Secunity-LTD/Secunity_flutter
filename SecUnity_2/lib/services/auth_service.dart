@@ -79,7 +79,7 @@ class AuthService {
             .inserteToUserData(firsName, lastName, dropdownValueTeam);
       }
 
-
+      
       return _userModelFromFirebase(user);
     }
     // if the email exists return 1, else return null
