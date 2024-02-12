@@ -1,23 +1,20 @@
-
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../services/auth_service.dart';
+import '../Home/home.dart';
 
-class SignUp extends StatefulWidget {
+class SignUpGmail extends StatefulWidget {
   final Function toggleView;
-  SignUp({required this.toggleView});
+  SignUpGmail({required this.toggleView});
 
   @override
-  _SignUpState createState() => _SignUpState();
+  _SignUpGmailState createState() => _SignUpGmailState();
 }
 
-class _SignUpState extends State<SignUp> {
+class _SignUpGmailState extends State<SignUpGmail> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
-  String email = '';
-  String password = '';
-  String confirmPassword = '';
   String error = '';
   String userType = '0';
   String firstName = '';
@@ -33,7 +30,7 @@ class _SignUpState extends State<SignUp> {
       appBar: AppBar(
         backgroundColor: primary,
         elevation: 0.0,
-        title: Text('Sign up to SecUnity'),
+        title: Text('complete details for SecUnity'),
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
@@ -95,44 +92,6 @@ class _SignUpState extends State<SignUp> {
 
 
           SizedBox(height: 10.0),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Email',
-            ),
-            validator: (value) => value!.isEmpty ? 'Enter an email' : null,
-            onChanged: (value) {
-              setState(() => email = value);
-            },
-          ),
-          SizedBox(height: 10.0),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Password',
-            ),
-            validator: (value) => value!.length < 6
-                ? 'Enter a password 6+ characters long'
-                : null,
-            obscureText: true,
-            onChanged: (value) {
-              setState(() => password = value);
-            },
-          ),
-          SizedBox(height: 10.0),
-          TextFormField(
-            decoration: InputDecoration(
-              labelText: 'Confirm Password',
-            ),
-            validator: (value) {
-              if (value != password) {
-                return 'Passwords do not match';
-              }
-              return null;
-            },
-            obscureText: true,
-            onChanged: (value) {
-              setState(() => confirmPassword = value);
-            },
-          ),
           DropdownButton<String>(
             value: dropdownValueTeam, // Default value
             onChanged: (String? newValue) {
@@ -165,26 +124,30 @@ class _SignUpState extends State<SignUp> {
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 setState(() => loading = true);
-                dynamic result = await _authService.signUp(firstName, lastName, dropdownValue, email, password, dropdownValueTeam);
+                dynamic result = await _authService.SignUpGmail(firstName, lastName, dropdownValue, dropdownValueTeam);
                 if (result == null) {
                   setState(() {
                     error = 'Please provide a valid email';
                     loading = false;
                   });
-                  print('change page 1');
                 } else if (result == 1) {
                   setState(() {
                     error = 'The email is already in use';
                     loading = false;
                   });
                 } else {
-                  print('change page 2');
-                  Navigator.pushReplacementNamed(context, '/sign_in');
+                  // Navigator.pushReplacementNamed(context, '/sign_in');
+                  // Navigate to LeaderScreen after successful sign-in
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                      builder: (context) => Home(),
+                      ),
+                  );
                 }
               }
             },
           ),
-
           SizedBox(height: 12.0),
           Text(
             error,
