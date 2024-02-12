@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/constants.dart';
 import '../../services/auth_service.dart';
+import '../Home/home.dart';
 
 class SignUpGmail extends StatefulWidget {
   final Function toggleView;
@@ -135,7 +136,14 @@ class _SignUpGmailState extends State<SignUpGmail> {
                     loading = false;
                   });
                 } else {
-                  Navigator.pushReplacementNamed(context, '/sign_in');
+                  // Navigator.pushReplacementNamed(context, '/sign_in');
+                  // Navigate to LeaderScreen after successful sign-in
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                      builder: (context) => Home(),
+                      ),
+                  );
                 }
               }
             },
