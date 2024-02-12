@@ -35,7 +35,7 @@ class _CrewPageState extends State<CrewScreen> {
   Future<void> _fetchUserName() async {
     try {
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('leaders')
+          .collection('crew')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
 

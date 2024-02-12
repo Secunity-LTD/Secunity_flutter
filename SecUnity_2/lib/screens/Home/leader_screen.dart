@@ -46,7 +46,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   Future<void> _fetchUserName() async {
     try {
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('crew')
+          .collection('leaders')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
 
