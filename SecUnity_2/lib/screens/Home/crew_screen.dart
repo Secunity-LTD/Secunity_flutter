@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:secunity_2/services/auth_service.dart';
+import 'package:secunity_2/constants/crew_style.dart';
 
 class CrewScreen extends StatefulWidget {
   @override
@@ -13,6 +14,7 @@ class CrewScreen extends StatefulWidget {
 class _CrewPageState extends State<CrewScreen> {
   final TextEditingController squadNameController = TextEditingController();
   final AuthService _authService = AuthService();
+  List<List<TextEditingController>> taskControllers = [];
   String firstName = '';
 
   // Helper function to build a checkbox for each time period
@@ -28,6 +30,8 @@ class _CrewPageState extends State<CrewScreen> {
   void initState() {
     super.initState();
     _fetchUserName();
+    _initializeTaskControllers();
+    _loadTasks();
   }
 
   bool isInPosition = false;
@@ -54,7 +58,8 @@ class _CrewPageState extends State<CrewScreen> {
       // Query Firestore to get the squad document where the current user is a member
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
           .collection('squads')
-          .where('members.requester_id',
+          .where(
+              'members.${FirebaseAuth.instance.currentUser!.uid}.requester_id',
               isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .get();
 
@@ -97,6 +102,128 @@ class _CrewPageState extends State<CrewScreen> {
       });
     } catch (e) {
       print('Error: $e');
+    }
+  }
+
+  Widget _buildTaskTextField(int dayIndex, int timeIndex) {
+    return TextField(
+      controller: taskControllers[dayIndex][timeIndex],
+      style: TextStyle(color: Colors.white),
+      enabled: false,
+      decoration: InputDecoration(
+        hintText: '---',
+        hintStyle: TextStyle(color: Colors.white),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  void _initializeTaskControllers() async {
+    try {
+      // Fetching squad ID where current user is the leader
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          // where the current user's ID is in the members[] contains the current user's ID
+          .where('members.requester_id',
+              isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      // Initialize the taskControllers list if it's null or empty
+      if (taskControllers == null || taskControllers.isEmpty) {
+        taskControllers = List.generate(
+            7, (_) => List.generate(3, (_) => TextEditingController()));
+      }
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        // Getting the ID of the first squad (assuming user can lead only one squad)
+        String squadId = squadSnapshot.docs.first.id;
+
+        for (int i = 0; i < 7; i++) {
+          for (int j = 0; j < 3; j++) {
+            String day = _getDayName(i);
+            String time = _getTimeName(j);
+            DocumentSnapshot taskSnapshot = await FirebaseFirestore.instance
+                .collection('squad_tasks')
+                .doc(
+                    '$day-$time-$squadId') // Using squad ID in task document ID
+                .get();
+
+            if (taskSnapshot.exists) {
+              Map<String, dynamic>? data =
+                  taskSnapshot.data() as Map<String, dynamic>?;
+
+              if (data != null && data.containsKey('task')) {
+                taskControllers[i][j] =
+                    TextEditingController(text: data['task']);
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error initializing task controllers: $e');
+    }
+  }
+
+  String _getDayName(int index) {
+    List<String> days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return days[index];
+  }
+
+  String _getTimeName(int index) {
+    List<String> times = ['Morning', 'Evening', 'Night'];
+    return times[index];
+  }
+
+  void _loadTasks() async {
+    try {
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('members',
+              arrayContains: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        String squadId = squadSnapshot.docs.first.id;
+        DocumentSnapshot tasksSnapshot = await FirebaseFirestore.instance
+            .collection('squad_tasks')
+            .doc(squadId)
+            .get();
+
+        if (tasksSnapshot.exists) {
+          Map<String, dynamic>? tasksData =
+              tasksSnapshot.data() as Map<String, dynamic>?;
+
+          if (tasksData != null) {
+            for (int i = 0; i < 7; i++) {
+              for (int j = 0; j < 3; j++) {
+                String day = _getDayName(i);
+                String time = _getTimeName(j);
+                String taskKey = '$day-$time';
+
+                if (tasksData.containsKey(taskKey)) {
+                  taskControllers[i][j].text = tasksData[taskKey];
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error loading tasks: $e');
     }
   }
 
@@ -165,50 +292,39 @@ class _CrewPageState extends State<CrewScreen> {
               children: [
                 // Table for days and time periods
                 Table(
-                  columnWidths: const {
-                    0: FlexColumnWidth(1), // Make the first column flexible
-                    1: FlexColumnWidth(1), // Make the second column flexible
-                    2: FlexColumnWidth(1), // Make the third column flexible
-                    3: FlexColumnWidth(1), // Make the fourth column flexible
+                  columnWidths: {
+                    0: FlexColumnWidth(1.5),
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2),
+                    3: FlexColumnWidth(2),
                   },
-                  border: TableBorder.all(
-                      color: Colors.white), // Add borders to the table
+                  border: TableBorder.all(color: Colors.white),
                   children: [
-                    // Table header row
-                    const TableRow(
+                    TableRow(
                       children: [
                         Center(
                             child: Text('Days',
-                                style: TextStyle(color: Colors.white))),
+                                style: CrewStyles.tableHeaderText)),
                         Center(
                             child: Text('Morning',
-                                style: TextStyle(color: Colors.white))),
+                                style: CrewStyles.tableHeaderText)),
                         Center(
                             child: Text('Evening',
-                                style: TextStyle(color: Colors.white))),
+                                style: CrewStyles.tableHeaderText)),
                         Center(
                             child: Text('Night',
-                                style: TextStyle(color: Colors.white))),
+                                style: CrewStyles.tableHeaderText)),
                       ],
                     ),
-                    // Build rows
-                    for (var day in [
-                      'Monday',
-                      'Tuesday',
-                      'Wednesday',
-                      'Thursday',
-                      'Friday',
-                      'Saturday',
-                      'Sunday'
-                    ])
+                    for (var dayIndex = 0; dayIndex < 7; dayIndex++)
                       TableRow(
                         children: [
                           Center(
-                              child: Text(day,
-                                  style: TextStyle(color: Colors.white))),
-                          _buildCheckbox('Morning'),
-                          _buildCheckbox('Evening'),
-                          _buildCheckbox('Night'),
+                              child: Text('Monday',
+                                  style: CrewStyles.tableHeaderText)),
+                          _buildTaskTextField(dayIndex, 0),
+                          _buildTaskTextField(dayIndex, 1),
+                          _buildTaskTextField(dayIndex, 2),
                         ],
                       ),
                   ],

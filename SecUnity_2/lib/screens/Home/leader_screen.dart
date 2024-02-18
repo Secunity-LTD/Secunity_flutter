@@ -162,15 +162,8 @@ class _LeaderPageState extends State<LeaderScreen> {
       if (squadSnapshot.docs.isNotEmpty) {
         DocumentSnapshot squadDoc = squadSnapshot.docs.first;
 
-        // Construct a map with key-value pairs
-        Map<String, dynamic> memberData = {
-          'requester_id': request['requester_id'],
-          'status': 'Not In Position'
-        };
-
-        // Add the map to the 'members' array field using FieldValue.arrayUnion
         await squadDoc.reference.update({
-          'members': FieldValue.arrayUnion([memberData])
+          'members': FieldValue.arrayUnion([request['requester_id']])
         });
 
         // Update the status of the join request
@@ -577,6 +570,7 @@ class _LeaderPageState extends State<LeaderScreen> {
           .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .get();
 
+      print("is not empty: ${squadSnapshot.docs.isNotEmpty}");
       if (squadSnapshot.docs.isNotEmpty) {
         String squadId = squadSnapshot.docs.first.id;
         DocumentSnapshot tasksSnapshot = await FirebaseFirestore.instance
