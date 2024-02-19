@@ -352,6 +352,24 @@ class _LeaderPageState extends State<LeaderScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    _fetchData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: CircleBorder(), // Make the button circular
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                        10.0), // Adjust padding to make it smaller
+                    child: Icon(
+                      Icons.refresh,
+                      color: Colors.black,
+                      size: 20, // Adjust icon size if needed
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
                     _authService.signOut(context);
                   },
                   style: ElevatedButton.styleFrom(

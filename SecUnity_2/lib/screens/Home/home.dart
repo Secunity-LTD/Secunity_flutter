@@ -60,7 +60,6 @@ class _HomeState extends State<Home> {
           // User not found in either 'leaders' or 'crew' collection
           // You may want to handle this case accordingly, e.g., navigate to a sign-in screen
 
-
           // If email and password are provided, perform a sign-in process
           if (widget.email != null && widget.password != null) {
             // Perform sign-in process using widget.email and widget.password
@@ -69,8 +68,9 @@ class _HomeState extends State<Home> {
             print(widget.password);
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => SignUpGmail(toggleView: (){})),
-            );  
+              MaterialPageRoute(
+                  builder: (context) => SignUpGmail(toggleView: () {})),
+            );
           } else {
             // Do something else if email and password are not provided
           }
@@ -95,8 +95,11 @@ class _HomeState extends State<Home> {
     // Placeholder widget for Home screen, you might want to customize it further
     return Scaffold(
       body: Center(
-        child:
-            CircularProgressIndicator(), // You can display a loader while navigating
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Colors.white, // Set color of the circular progress indicator
+          ),
+        ), // You can display a loader while navigating
       ),
     );
   }

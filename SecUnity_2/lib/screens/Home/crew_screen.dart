@@ -331,6 +331,24 @@ class _CrewPageState extends State<CrewScreen> {
                 // top right button logout
                 ElevatedButton(
                   onPressed: () async {
+                    _fetchData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: CircleBorder(), // Make the button circular
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                        10.0), // Adjust padding to make it smaller
+                    child: Icon(
+                      Icons.refresh,
+                      color: Colors.black,
+                      size: 20, // Adjust icon size if needed
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
                     // Sign out the current user
                     _authService.signOut(context);
 
