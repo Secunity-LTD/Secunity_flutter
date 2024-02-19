@@ -25,6 +25,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   String leaderUid = '';
   String firstName = '';
+  String teamName = '';
   bool _isLoading = true;
 
   @override
@@ -34,6 +35,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   }
 
   Future<void> _fetchData() async {
+    await _fetchTeamName();
     await _checkIfLeader();
     await _fetchJoinRequests();
     await _initializeTaskControllers();
@@ -42,6 +44,23 @@ class _LeaderPageState extends State<LeaderScreen> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> _fetchTeamName() async {
+    try {
+      QuerySnapshot SquadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (SquadSnapshot.docs.isNotEmpty) {
+        setState(() {
+          teamName = SquadSnapshot.docs.first['squad_name'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching team name: $e');
+    }
   }
 
   void _showSnackBar(String message) {
@@ -348,7 +367,17 @@ class _LeaderPageState extends State<LeaderScreen> {
               children: [
                 Text(
                   'Hello $firstName !',
-                  style: LeaderStyles.headerText,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5,
+                        color: Colors.black,
+                        offset: Offset(3, 3),
+                      ),
+                    ],
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -404,6 +433,23 @@ class _LeaderPageState extends State<LeaderScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (squadCreated)
+                  Center(
+                    child: Text(
+                      '$teamName Schedule',
+                      style: TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 5,
+                            color: Colors.black,
+                            offset: Offset(3, 3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Table(
                   columnWidths: {
                     0: FlexColumnWidth(1.5),

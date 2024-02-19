@@ -20,6 +20,7 @@ class _CrewPageState extends State<CrewScreen> {
   final AuthService _authService = AuthService();
   List<List<TextEditingController>> taskControllers = [];
   String firstName = '';
+  String teamName = '';
   bool isInPosition = false;
   bool _isLoading = true;
   bool _hasTeam = false;
@@ -42,6 +43,7 @@ class _CrewPageState extends State<CrewScreen> {
   Future<void> _fetchData() async {
     try {
       // Fetch data here
+      await _fetchTeamName();
       await _fetchUserName();
       await _initializeTaskControllers();
       await _loadTasks();
@@ -55,6 +57,26 @@ class _CrewPageState extends State<CrewScreen> {
         _isLoading =
             false; // Set loading to false when data fetching is complete
       });
+    }
+  }
+
+  Future<void> _fetchTeamName() async {
+    try {
+      // Fetching squad ID where current user is the leader
+      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          // where the current user's ID is in the members[] contains the current user's ID
+          .where('members',
+              arrayContains: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (squadSnapshot.docs.isNotEmpty) {
+        setState(() {
+          teamName = squadSnapshot.docs.first['squad_name'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching team name: $e');
     }
   }
 
@@ -183,7 +205,7 @@ class _CrewPageState extends State<CrewScreen> {
       }
 
       // Initialize the taskControllers list if it's null or empty
-      if (taskControllers == null || taskControllers.isEmpty) {
+      if (taskControllers.isEmpty) {
         taskControllers = List.generate(
             7, (_) => List.generate(3, (_) => TextEditingController()));
       }
@@ -324,8 +346,15 @@ class _CrewPageState extends State<CrewScreen> {
                 Text(
                   'Hello $firstName !',
                   style: TextStyle(
-                    color: Colors.white,
                     fontSize: 20,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5,
+                        color: Colors.black,
+                        offset: Offset(3, 3),
+                      ),
+                    ],
                   ),
                 ), // Text color changed to white
                 // top right button logout
@@ -376,6 +405,23 @@ class _CrewPageState extends State<CrewScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (_hasTeam)
+                  Center(
+                    child: Text(
+                      '$teamName Schedule',
+                      style: TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 5,
+                            color: Colors.black,
+                            offset: Offset(3, 3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 // Table for days and time periods
                 Table(
                   columnWidths: {
