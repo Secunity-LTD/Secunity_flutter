@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:secunity_2/models/userModel.dart';
+import 'package:secunity_2/services/crew_database.dart';
+import 'package:secunity_2/services/leader_database.dart';
 
 import '../../constants/leader_style.dart';
 import '../../services/team_service.dart';
@@ -23,15 +25,23 @@ class _LeaderPageState extends State<LeaderScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   String leaderUid = '';
   String firstName = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _checkIfLeader();
-    _fetchJoinRequests();
-    _initializeTaskControllers();
-    _loadTasks();
-    _fetchUserName();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    await _checkIfLeader();
+    await _fetchJoinRequests();
+    await _initializeTaskControllers();
+    await _loadTasks();
+    await _fetchUserName();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _showSnackBar(String message) {
@@ -60,7 +70,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     }
   }
 
-  void _checkIfLeader() async {
+  Future<void> _checkIfLeader() async {
     // check if 'has a team' field is true in the leader's document
     DocumentSnapshot leaderSnapshot = await FirebaseFirestore.instance
         .collection('leaders')
@@ -77,7 +87,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     }
   }
 
-  void _fetchJoinRequests() async {
+  Future<void> _fetchJoinRequests() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('requests')
         .where('leader_id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
@@ -89,7 +99,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     });
   }
 
-  void _initializeTaskControllers() async {
+  Future<void> _initializeTaskControllers() async {
     try {
       // Fetching squad ID where current user is the leader
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
@@ -158,13 +168,20 @@ class _LeaderPageState extends State<LeaderScreen> {
           .collection('squads')
           .where('squad_name', isEqualTo: request['squad_name'])
           .get();
+      print("squadSnapshot: $squadSnapshot");
 
       if (squadSnapshot.docs.isNotEmpty) {
         DocumentSnapshot squadDoc = squadSnapshot.docs.first;
-
+        print("squadDoc: $squadDoc");
+        dynamic crewuid = request['requester_id'];
+        print("crewuid: $crewuid");
         await squadDoc.reference.update({
           'members': FieldValue.arrayUnion([request['requester_id']])
         });
+        // CrewDatabaseService _crewDatabaseService = CrewDatabaseService(uid: crewuid);
+        // print(FirebaseAuth.instance.currentUser!.uid);
+        CrewDatabaseService(uid: crewuid)
+            .updateTeamUid(FirebaseAuth.instance.currentUser!.uid);
 
         // Update the status of the join request
         await request.reference.update({'status': 'accepted'});
@@ -285,12 +302,27 @@ class _LeaderPageState extends State<LeaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      // If loading, show a loading indicator with gradient background
+      return Scaffold(
+        backgroundColor: LeaderStyles.backgroundColor1,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Colors.white, // Set color of the circular progress indicator
+            ),
+          ),
+        ),
+      );
+    }
     final userModel = Provider.of<UserModel?>(context);
     final user = this.user;
     if (user != null) {
       leaderUid = user.uid;
     }
     final TeamService _teamService = TeamService(leaderUid: leaderUid);
+    final LeaderDatabaseService _leaderDatabaseService =
+        LeaderDatabaseService(uid: leaderUid);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -482,9 +514,13 @@ class _LeaderPageState extends State<LeaderScreen> {
                           ElevatedButton(
                             onPressed: () {
                               _teamService.createTeam(
+                                  // --------------------------------------
                                   squadNameController.text.trim(),
                                   squadCityController.text.trim(),
                                   context);
+                              // add teamUID to the leader's document
+                              _leaderDatabaseService.updateLeaderTeam();
+
                               setState(() {
                                 squadCreated = true;
                               });
@@ -563,7 +599,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   }
 
   // Function to load tasks for the squad when logging in
-  void _loadTasks() async {
+  Future<void> _loadTasks() async {
     try {
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
           .collection('squads')
