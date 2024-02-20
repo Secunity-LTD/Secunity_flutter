@@ -25,15 +25,42 @@ class _LeaderPageState extends State<LeaderScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   String leaderUid = '';
   String firstName = '';
+  String teamName = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _checkIfLeader();
-    _fetchJoinRequests();
-    _initializeTaskControllers();
-    _loadTasks();
-    _fetchUserName();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    await _fetchTeamName();
+    await _checkIfLeader();
+    await _fetchJoinRequests();
+    await _initializeTaskControllers();
+    await _loadTasks();
+    await _fetchUserName();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _fetchTeamName() async {
+    try {
+      QuerySnapshot SquadSnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('leader', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      if (SquadSnapshot.docs.isNotEmpty) {
+        setState(() {
+          teamName = SquadSnapshot.docs.first['squad_name'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching team name: $e');
+    }
   }
 
   void _showSnackBar(String message) {
@@ -62,7 +89,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     }
   }
 
-  void _checkIfLeader() async {
+  Future<void> _checkIfLeader() async {
     // check if 'has a team' field is true in the leader's document
     DocumentSnapshot leaderSnapshot = await FirebaseFirestore.instance
         .collection('leaders')
@@ -79,7 +106,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     }
   }
 
-  void _fetchJoinRequests() async {
+  Future<void> _fetchJoinRequests() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('requests')
         .where('leader_id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
@@ -91,7 +118,7 @@ class _LeaderPageState extends State<LeaderScreen> {
     });
   }
 
-  void _initializeTaskControllers() async {
+  Future<void> _initializeTaskControllers() async {
     try {
       // Fetching squad ID where current user is the leader
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
@@ -294,6 +321,19 @@ class _LeaderPageState extends State<LeaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      // If loading, show a loading indicator with gradient background
+      return Scaffold(
+        backgroundColor: LeaderStyles.backgroundColor1,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Colors.white, // Set color of the circular progress indicator
+            ),
+          ),
+        ),
+      );
+    }
     final userModel = Provider.of<UserModel?>(context);
     final user = this.user;
     if (user != null) {
@@ -327,7 +367,35 @@ class _LeaderPageState extends State<LeaderScreen> {
               children: [
                 Text(
                   'Hello $firstName !',
-                  style: LeaderStyles.headerText,
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 5,
+                        color: Colors.black,
+                        offset: Offset(3, 3),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    _fetchData();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: CircleBorder(), // Make the button circular
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                        10.0), // Adjust padding to make it smaller
+                    child: Icon(
+                      Icons.refresh,
+                      color: Colors.black,
+                      size: 20, // Adjust icon size if needed
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -365,6 +433,23 @@ class _LeaderPageState extends State<LeaderScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (squadCreated)
+                  Center(
+                    child: Text(
+                      '$teamName Schedule',
+                      style: TextStyle(
+                        fontSize: 30,
+                        color: Colors.white,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 5,
+                            color: Colors.black,
+                            offset: Offset(3, 3),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Table(
                   columnWidths: {
                     0: FlexColumnWidth(1.5),
@@ -578,7 +663,7 @@ class _LeaderPageState extends State<LeaderScreen> {
   }
 
   // Function to load tasks for the squad when logging in
-  void _loadTasks() async {
+  Future<void> _loadTasks() async {
     try {
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
           .collection('squads')

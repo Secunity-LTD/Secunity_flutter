@@ -4,8 +4,15 @@ import 'package:flutter/material.dart';
 
 class LeaderStyles {
   static TextStyle headerText = TextStyle(
-    color: Colors.white,
     fontSize: 20,
+    color: Colors.white,
+    shadows: [
+      Shadow(
+        blurRadius: 5,
+        color: Colors.black,
+        offset: Offset(3, 3),
+      ),
+    ],
   );
 
   static TextStyle dropdownItemText = TextStyle(
