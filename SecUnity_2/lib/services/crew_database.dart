@@ -4,10 +4,19 @@ import 'package:secunity_2/models/crew_user.dart';
 
 class CrewDatabaseService {
   final String uid;
+  // User? user = FirebaseAuth.instance.currentUser;
   CrewDatabaseService({required this.uid});
   // collection reference
   final CollectionReference crewCollection =
       FirebaseFirestore.instance.collection('crew');
+
+  // Fetch crew user data
+  Future<CrewUser> getCrewUserDetails() async {
+    dynamic snapshot = crewCollection.doc(uid);
+    final crewUser = snapshot.docs.map((e) => CrewUser.fromSnapshot(e)).single;
+    return await crewUser;
+  }
+    
 
   Future inserteToUserData(
       String firstName, String lastName, String role) async {
