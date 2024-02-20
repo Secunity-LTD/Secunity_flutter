@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
               '/crew': (context) => CrewScreen(),
               // Add other routes here
             },
-            home: PositionChartPage(),
+            home: Wrapper(),
           );
         });
   }

@@ -4,49 +4,48 @@ import 'package:secunity_2/constants/leader_style.dart';
 import 'package:secunity_2/services/leader_database.dart';
 
 class TeamService {
-  String leaderUid;
-  // collection reference
+  String squadUid;
+  // String? squadUid;  // collection reference
   final CollectionReference teamCollection =
       FirebaseFirestore.instance.collection('squads');
 
-  TeamService({required this.leaderUid});
+  TeamService({required this.squadUid});
 
-  Future createTeam(String squadName, String squadCity, context) async {
-    print("entered createTeam");
-    if (squadName.isNotEmpty && squadCity.isNotEmpty) {
-      try {
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-            .collection('squads')
-            .where('name', isEqualTo: squadName)
-            .get();
+  // Future<String?> createTeam(
+  //     String squadName, String squadCity, context) async {
+  //   print("entered createTeam");
+  //   if (squadName.isNotEmpty && squadCity.isNotEmpty) {
+  //     try {
+  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+  //           .collection('squads')
+  //           .where('name', isEqualTo: squadName)
+  //           .get();
 
-        if (querySnapshot.docs.isNotEmpty) {
-          _showSnackBar('A squad with the same name already exists.', context);
-        } else {
-          await FirebaseFirestore.instance.collection('squads').add({
-            'squad_name': squadName,
-            'city': squadCity,
-            'leader': leaderUid,
-            'members': [],
-            'alert': false,
-            'position': [],
-          });
-
-          LeaderDatabaseService(uid: leaderUid).updateLeaderState(true);
-          // QuerySnapshot querySnapUpdate = await FirebaseFirestore.instance
-          // .collection("leaders")
-          // .doc(leaderUid)
-          // .update({'has a team': true});
-
-          _showSnackBar('Squad created successfully!', context);
-        }
-      } catch (e) {
-        print('Error creating squad: $e');
-      }
-    } else {
-      _showSnackBar('Squad name and city cannot be empty.', context);
-    }
-  }
+  //       if (querySnapshot.docs.isNotEmpty) {
+  //         _showSnackBar('A squad with the same name already exists.', context);
+  //       } else {
+  //         DocumentReference documentReference = await teamCollection.add({
+  //           'squad_name': squadName,
+  //           'city': squadCity,
+  //           'leader': leaderUid,
+  //           'members': [],
+  //           'position': [],
+  //           'alert': false,
+  //         });
+  //         this.squadUid = documentReference.id;
+  //         print("squadUid: $squadUid");
+  //         LeaderDatabaseService(uid: leaderUid).updateLeaderState(true);
+  //         _showSnackBar('Squad created successfully!', context);
+  //         // Return the document ID
+  //         return documentReference.id;
+  //       }
+  //     } catch (e) {
+  //       print('Error creating squad: $e');
+  //     }
+  //   } else {
+  //     _showSnackBar('Squad name and city cannot be empty.', context);
+  //   }
+  // }
 
   void _showSnackBar(String message, context) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -57,42 +56,13 @@ class TeamService {
     );
   }
 
-/*
-for each crew as function "in position"
-when he activates the function, the crew will be added to the list of in position
-
-*/
-
-  // // Create new Team method
-  //  void _createSquad(String squadName, String squadCity) async {
-  //    if (squadName.isNotEmpty && squadCity.isNotEmpty) {
-  //      try {
-  //        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //            .collection('squads')
-  //            .where('name', isEqualTo: squadName)
-  //            .get();
-  //
-  //        if (querySnapshot.docs.isNotEmpty) {
-  //          _showSnackBar('A squad with the same name already exists.');
-  //        } else {
-  //          await FirebaseFirestore.instance.collection('squads').add({
-  //            'squad_name': squadName,
-  //            'city': squadCity,
-  //            'leader': FirebaseAuth.instance.currentUser!.uid,
-  //            'members': [],
-  //            'alert': false,
-  //          });
-  //          squadNameController.clear();
-  //          setState(() {
-  //            squadCreated = true;
-  //          });
-  //          _showSnackBar('Squad created successfully!');
-  //        }
-  //      } catch (e) {
-  //        print('Error creating squad: $e');
-  //      }
-  //    } else {
-  //      _showSnackBar('Squad name and city cannot be empty.');
-  //    }
-  //  }
+  // in Position
+  Future<void> updatePosition(String crewUid) async {
+    print("entered updatePosition - TeamService");
+    print("squadUid: $squadUid");
+    await teamCollection.doc(squadUid).update({
+      'position': FieldValue.arrayUnion([crewUid]),
+    });
+    print('crewUid appended to position successfully: $crewUid');
+  }
 }

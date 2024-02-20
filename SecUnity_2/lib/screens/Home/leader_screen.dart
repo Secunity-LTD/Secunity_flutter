@@ -335,12 +335,11 @@ class _LeaderPageState extends State<LeaderScreen> {
         ),
       );
     }
-    final userModel = Provider.of<UserModel?>(context);
     final user = this.user;
     if (user != null) {
       leaderUid = user.uid;
     }
-    final TeamService _teamService = TeamService(leaderUid: leaderUid);
+    // final TeamService _teamService = TeamService(leaderUid: leaderUid);
     final LeaderDatabaseService _leaderDatabaseService =
         LeaderDatabaseService(uid: leaderUid);
     return Scaffold(
@@ -590,15 +589,19 @@ class _LeaderPageState extends State<LeaderScreen> {
                                 ),
                               ),
                               ElevatedButton(
-                                onPressed: () {
-                                  _teamService.createTeam(
+                                onPressed: () async {
+                                  String? teamUid = await  _leaderDatabaseService.createTeam(
                                       // --------------------------------------
                                       squadNameController.text.trim(),
                                       squadCityController.text.trim(),
                                       context);
                                   // add teamUID to the leader's document
-                                  _leaderDatabaseService.updateLeaderTeam();
-
+                                  if(teamUid != null){
+                                    _leaderDatabaseService.updateLeaderState(true);
+                                  
+                                  _leaderDatabaseService.updateLeaderTeam(teamUid);
+                                  print("teamUid: $teamUid");
+                                  }
                                   // sync the data
                                   _fetchData();
 

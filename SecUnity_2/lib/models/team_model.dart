@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Team {
   final String uid;
   final String name;
@@ -19,5 +21,19 @@ class Team {
       'position': position,
       'alert': alert,
     };
+  }
+
+  // Map Team object from firebase snapshot
+  factory Team.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> document) {
+    final data = document.data()!; // as Map<String, dynamic>;
+    return Team(
+      document.id,
+      data["squad_name"],
+      data['city'],
+      data['leader'],
+      List<String>.from(data['members']),
+      List<String>.from(data['position']),
+      data['alert'],
+    );
   }
 }

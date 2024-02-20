@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:secunity_2/constants/leader_style.dart';
 import 'package:secunity_2/models/UserModel.dart';
+import 'package:flutter/material.dart';
 // import 'package:secunity_2/services/team_database.dart';
 
 import '../models/leader_user.dart';
@@ -10,6 +12,9 @@ class LeaderDatabaseService {
   // collection reference
   final CollectionReference leadersCollection =
       FirebaseFirestore.instance.collection('leaders');
+
+  final CollectionReference teamCollection =
+      FirebaseFirestore.instance.collection('squads');
 
   Future insertUserToData(
       String firstName, String lastName, String role) async {
@@ -59,13 +64,56 @@ class LeaderDatabaseService {
     }
   }
 
-  Future updateLeaderTeam() async {
+  Future updateLeaderTeam(String squadId) async {
     print("entered updateLeaderTeam");
-    String? squadId = await getDocumentIdByLeaderUid(uid);
-    print('squadId: $squadId');
     return await leadersCollection.doc(uid).update({
       'team uid': squadId,
     });
+  }
+
+  Future<String?> createTeam(
+      String squadName, String squadCity, context) async {
+    print("entered createTeam");
+    if (squadName.isNotEmpty && squadCity.isNotEmpty) {
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('squads')
+            .where('name', isEqualTo: squadName)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          _showSnackBar('A squad with the same name already exists.', context);
+        } else {
+          DocumentReference documentReference = await teamCollection.add({
+            'squad_name': squadName,
+            'city': squadCity,
+            'leader': uid,
+            'members': [],
+            'position': [],
+            'alert': false,
+          });
+          // this.squadUid = documentReference.id;
+          // print("squadUid: $squadUid");
+          LeaderDatabaseService(uid: uid).updateLeaderState(true);
+          _showSnackBar('Squad created successfully!', context);
+          // Return the document ID
+          return documentReference.id;
+        }
+      } catch (e) {
+        print('Error creating squad: $e');
+      }
+    } else {
+      _showSnackBar('Squad name and city cannot be empty.', context);
+    }
+  }
+
+  void _showSnackBar(String message, context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: LeaderStyles.snackBarText),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
   // // user data from snapshots

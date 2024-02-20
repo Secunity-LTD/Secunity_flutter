@@ -10,13 +10,52 @@ class CrewDatabaseService {
   final CollectionReference crewCollection =
       FirebaseFirestore.instance.collection('crew');
 
-  // Fetch crew user data
+  // // Fetch crew user data
+  // Future<CrewUser> getCrewUserDetails() async {
+  //   dynamic snapshot = crewCollection.doc(uid);
+  //   final crewUser = snapshot.docs.map((e) => CrewUser.fromSnapshot(e)).single;
+  //   return await crewUser;
+  // }
+
   Future<CrewUser> getCrewUserDetails() async {
-    dynamic snapshot = crewCollection.doc(uid);
-    final crewUser = snapshot.docs.map((e) => CrewUser.fromSnapshot(e)).single;
-    return await crewUser;
+    try {
+      DocumentSnapshot<Object?> snapshot = await crewCollection.doc(uid).get();
+
+      if (snapshot.exists) {
+        // If the document exists, create a CrewUser object from the snapshot
+        return CrewUser.fromSnapshot(
+            snapshot as DocumentSnapshot<Map<String, dynamic>>);
+      } else {
+        // If the document does not exist, return a default or handle accordingly
+        print('Document with UID $uid does not exist');
+        return CrewUser(
+          uid: uid,
+          firstName: '',
+          lastName: '',
+          role: '',
+          leaderUid: '',
+          teamUid: '',
+        );
+      }
+    } catch (e) {
+      // Handle errors
+      print("Error getting crew user details: $e");
+      // You might want to throw an exception or handle it in a way that suits your app's needs
+      return CrewUser(
+        uid: uid,
+        firstName: '',
+        lastName: '',
+        role: '',
+        leaderUid: '',
+        teamUid: '',
+      );
+    }
   }
-    
+
+  // update user data
+  Future<void> updateUserData(CrewUser crewUser) async {
+    await crewCollection.doc(uid).update(crewUser.toJson());
+  }
 
   Future inserteToUserData(
       String firstName, String lastName, String role) async {
@@ -29,14 +68,6 @@ class CrewDatabaseService {
     });
   }
 
-  Future updateUserData(String firstName, String lastName, String role) async {
-    return await crewCollection.doc(uid).set({
-      'first name': firstName,
-      'last name': lastName,
-      'role': role,
-      // 'team': ,
-    });
-  }
 
   Future updateTeamUid(String leaderUid) async {
     print("entered updateTeamUid");

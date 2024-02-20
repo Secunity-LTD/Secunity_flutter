@@ -30,17 +30,29 @@ class CrewUser {
     };
   }
 
-  // Map CrewUser object from firebase snapshot
-  factory CrewUser.fromSnapshot(
-      DocumentSnapshot<Map<String, dynamic>> document) {
-    final data = document.data()!; // as Map<String, dynamic>;
-    return CrewUser(
-      uid: document.id,
-      firstName: data["first name"],
-      lastName: data['last name'],
-      role: data['role'],
-      leaderUid: data['leader uid'],
-      teamUid: data['team uid'],
-    );
-  }
+  // // Map CrewUser object from firebase snapshot
+  // factory CrewUser.fromSnapshot(
+  //     DocumentSnapshot<Map<String, dynamic>> document) {
+  //   final data = document.data()!; // as Map<String, dynamic>;
+  //   return CrewUser(
+  //     uid: document.id,
+  //     firstName: data["first name"],
+  //     lastName: data['last name'],
+  //     role: data['role'],
+  //     leaderUid: data['leader uid'],
+  //     teamUid: data['team uid'],
+  //   );
+  // }
+  factory CrewUser.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> document) {
+  final data = document.data() ?? {}; // Handle nullable data
+  return CrewUser(
+    uid: document.id,
+    firstName: data["first name"] ?? "", // Provide default value or handle null
+    lastName: data['last name'] ?? "", // Provide default value or handle null
+    role: data['role'] ?? "", // Provide default value or handle null
+    leaderUid: data['leader uid'] ?? "", // Provide default value or handle null
+    teamUid: data['team uid'] ?? "", // Provide default value or handle null
+  );
+}
+
 }
