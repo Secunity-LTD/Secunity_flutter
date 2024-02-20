@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:secunity_2/screens/Home/leader_screen.dart';
 import 'package:secunity_2/screens/Home/crew_screen.dart';
+import 'package:secunity_2/screens/Home/positions_screen.dart';
 import 'package:secunity_2/screens/authenticate/sign_in.dart';
 import 'package:secunity_2/screens/authenticate/sign_up_gmail.dart';
 import 'package:secunity_2/services/auth_service.dart';
@@ -10,7 +11,7 @@ import 'package:secunity_2/wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:secunity_2/screens/authenticate/login_screen.dart';
 import 'package:secunity_2/screens/authenticate/sign_up.dart';
-
+import 'package:flutter/material.dart';
 import 'models/UserModel.dart';
 
 void main() async {
@@ -50,7 +51,7 @@ class MyApp extends StatelessWidget {
               '/crew': (context) => CrewScreen(),
               // Add other routes here
             },
-            home: Wrapper(),
+            home: PositionChartPage(),
           );
         });
   }
