@@ -17,7 +17,8 @@ class LeaderDatabaseService {
       'first name': firstName,
       'last name': lastName,
       'role': role,
-      'has a team': false
+      'has a team': false,
+      'team uid': '',
     });
   }
 
@@ -30,8 +31,40 @@ class LeaderDatabaseService {
   }
 
   Future updateLeaderState(bool state) async {
+    print("entered updateLeaderState");
+    // String? squadId = await getDocumentIdByLeaderUid(uid);
+    // print('squadId: $squadId');
     return await leadersCollection.doc(uid).update({
       'has a team': state,
+      // 'team uid': squadId,
+    });
+  }
+
+  Future<String?> getDocumentIdByLeaderUid(String leaderUid) async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('squads')
+          .where('leader', isEqualTo: leaderUid)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Assuming there is only one document with the given leaderUid
+        return querySnapshot.docs.first.id;
+      } else {
+        return null; // No matching document found
+      }
+    } catch (e) {
+      print("Error getting document ID: $e");
+      return null;
+    }
+  }
+
+  Future updateLeaderTeam() async {
+    print("entered updateLeaderTeam");
+    String? squadId = await getDocumentIdByLeaderUid(uid);
+    print('squadId: $squadId');
+    return await leadersCollection.doc(uid).update({
+      'team uid': squadId,
     });
   }
 

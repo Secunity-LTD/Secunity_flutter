@@ -42,6 +42,7 @@ class _HomeState extends State<Home> {
           MaterialPageRoute(builder: (context) => LeaderScreen()),
         );
       } else {
+        print("enter else for crew screen");
         // User is not a leader, check if they are a crew member
         DocumentSnapshot crewSnapshot = await FirebaseFirestore.instance
             .collection('crew')
@@ -49,6 +50,7 @@ class _HomeState extends State<Home> {
             .get();
 
         if (crewSnapshot.exists) {
+          print("enter crew exist");
           // User is a crew member, navigate to CrewScreen
           Navigator.pushReplacement(
             context,

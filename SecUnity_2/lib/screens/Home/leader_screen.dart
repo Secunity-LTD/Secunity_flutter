@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:secunity_2/models/userModel.dart';
+import 'package:secunity_2/services/crew_database.dart';
+import 'package:secunity_2/services/leader_database.dart';
 
 import '../../constants/leader_style.dart';
 import '../../services/team_service.dart';
@@ -158,13 +160,20 @@ class _LeaderPageState extends State<LeaderScreen> {
           .collection('squads')
           .where('squad_name', isEqualTo: request['squad_name'])
           .get();
+      print("squadSnapshot: $squadSnapshot");
 
       if (squadSnapshot.docs.isNotEmpty) {
         DocumentSnapshot squadDoc = squadSnapshot.docs.first;
-
+        print("squadDoc: $squadDoc");
+        dynamic crewuid = request['requester_id'];
+        print("crewuid: $crewuid");
         await squadDoc.reference.update({
           'members': FieldValue.arrayUnion([request['requester_id']])
         });
+        // CrewDatabaseService _crewDatabaseService = CrewDatabaseService(uid: crewuid);
+        // print(FirebaseAuth.instance.currentUser!.uid);
+        CrewDatabaseService(uid: crewuid)
+            .updateTeamUid(FirebaseAuth.instance.currentUser!.uid);
 
         // Update the status of the join request
         await request.reference.update({'status': 'accepted'});
@@ -291,6 +300,8 @@ class _LeaderPageState extends State<LeaderScreen> {
       leaderUid = user.uid;
     }
     final TeamService _teamService = TeamService(leaderUid: leaderUid);
+    final LeaderDatabaseService _leaderDatabaseService =
+        LeaderDatabaseService(uid: leaderUid);
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -482,9 +493,13 @@ class _LeaderPageState extends State<LeaderScreen> {
                           ElevatedButton(
                             onPressed: () {
                               _teamService.createTeam(
+                                  // --------------------------------------
                                   squadNameController.text.trim(),
                                   squadCityController.text.trim(),
                                   context);
+                              // add teamUID to the leader's document
+                              _leaderDatabaseService.updateLeaderTeam();
+
                               setState(() {
                                 squadCreated = true;
                               });

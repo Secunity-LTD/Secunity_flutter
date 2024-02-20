@@ -3,8 +3,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:secunity_2/models/crew_user.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/crew_style.dart';
+import 'package:secunity_2/services/crew_database.dart';
+import 'package:secunity_2/services/team_service.dart';
 
 class CrewScreen extends StatefulWidget {
   @override
@@ -55,6 +59,7 @@ class _CrewPageState extends State<CrewScreen> {
 
   void TogglePosition() async {
     try {
+      print("enter toggle position");
       // Query Firestore to get the squad document where the current user is a member
       QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
           .collection('squads')
@@ -64,8 +69,9 @@ class _CrewPageState extends State<CrewScreen> {
           .get();
 
       if (squadSnapshot.docs.isNotEmpty) {
+        print("enter if squadSnapshot.docs.isNotEmpty");
         String squadId = squadSnapshot.docs.first.id;
-
+        print("squadId: $squadId");
         // Get the reference to the squad document
         DocumentReference squadRef =
             FirebaseFirestore.instance.collection('squads').doc(squadId);
@@ -229,6 +235,12 @@ class _CrewPageState extends State<CrewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    dynamic userUid = user!.uid;
+    print("userUid: $userUid");
+    // take snapshot of the user
+
+    // -------------------------------------------------------
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -377,6 +389,7 @@ class _CrewPageState extends State<CrewScreen> {
                     ElevatedButton(
                       onPressed: () {
                         TogglePosition();
+                        // ------------------------------------------------------------------
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isInPosition
