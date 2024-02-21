@@ -15,8 +15,8 @@ class CrewTeamService {
   // Constructor
   CrewTeamService(String leaderUid) {
     print("entered CrewTeamService constructor");
-    teamService = TeamService(squadUid: leaderUid);
-    print("teamUid: ${teamService.squadUid}");
+    teamService = TeamService(uid: leaderUid);
+    print("teamUid: ${teamService.uid}");
   } 
 
 

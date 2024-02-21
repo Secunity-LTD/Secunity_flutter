@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../../constants/positions _style.dart';
 
 class PositionChartPage extends StatefulWidget {
+  final String squadUid;
+
+  PositionChartPage({required this.squadUid});
+
   @override
   _PositionChartPageState createState() => _PositionChartPageState();
 }
@@ -27,7 +31,6 @@ class _PositionChartPageState extends State<PositionChartPage> {
 
     return Scaffold(
       backgroundColor: PositionStyles.backgroundColor1,
-
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -147,5 +150,3 @@ class _PositionChartPageState extends State<PositionChartPage> {
     });
   }
 }
-
-

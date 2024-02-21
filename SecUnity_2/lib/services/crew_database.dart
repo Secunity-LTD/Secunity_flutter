@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:secunity_2/models/crew_user.dart';
@@ -10,13 +12,15 @@ class CrewDatabaseService {
   final CollectionReference crewCollection =
       FirebaseFirestore.instance.collection('crew');
 
-  // // Fetch crew user data
-  // Future<CrewUser> getCrewUserDetails() async {
-  //   dynamic snapshot = crewCollection.doc(uid);
-  //   final crewUser = snapshot.docs.map((e) => CrewUser.fromSnapshot(e)).single;
-  //   return await crewUser;
-  // }
+  final StreamController<CrewUser> _crewUserController =
+                                  StreamController<CrewUser>.broadcast();
 
+  Stream<CrewUser> get crewUserStream => _crewUserController.stream;
+
+  void dispose() {
+    _crewUserController.close();
+  }
+  // get user details
   Future<CrewUser> getCrewUserDetails() async {
     try {
       DocumentSnapshot<Object?> snapshot = await crewCollection.doc(uid).get();

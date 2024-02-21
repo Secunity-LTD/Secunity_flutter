@@ -1,66 +1,45 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:secunity_2/constants/leader_style.dart';
-import 'package:secunity_2/services/leader_database.dart';
+import 'package:secunity_2/models/team_model.dart';
 
 class TeamService {
-  String squadUid;
+  String uid;
   // String? squadUid;  // collection reference
   final CollectionReference teamCollection =
       FirebaseFirestore.instance.collection('squads');
 
-  TeamService({required this.squadUid});
+  TeamService({required this.uid});
 
-  // Future<String?> createTeam(
-  //     String squadName, String squadCity, context) async {
-  //   print("entered createTeam");
-  //   if (squadName.isNotEmpty && squadCity.isNotEmpty) {
-  //     try {
-  //       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-  //           .collection('squads')
-  //           .where('name', isEqualTo: squadName)
-  //           .get();
+  StreamController<Team> _teamController = StreamController<Team>.broadcast();
 
-  //       if (querySnapshot.docs.isNotEmpty) {
-  //         _showSnackBar('A squad with the same name already exists.', context);
-  //       } else {
-  //         DocumentReference documentReference = await teamCollection.add({
-  //           'squad_name': squadName,
-  //           'city': squadCity,
-  //           'leader': leaderUid,
-  //           'members': [],
-  //           'position': [],
-  //           'alert': false,
-  //         });
-  //         this.squadUid = documentReference.id;
-  //         print("squadUid: $squadUid");
-  //         LeaderDatabaseService(uid: leaderUid).updateLeaderState(true);
-  //         _showSnackBar('Squad created successfully!', context);
-  //         // Return the document ID
-  //         return documentReference.id;
-  //       }
-  //     } catch (e) {
-  //       print('Error creating squad: $e');
-  //     }
-  //   } else {
-  //     _showSnackBar('Squad name and city cannot be empty.', context);
-  //   }
-  // }
+  Stream<Team> get teamStream => _teamController.stream;
 
-  void _showSnackBar(String message, context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, style: LeaderStyles.snackBarText),
-        duration: Duration(seconds: 2),
-      ),
-    );
+  void dispose() {
+    _teamController.close();
+  }
+
+  FutureOr<Team> getTeamDetails() async {
+    print("entered getTeamDetails - TeamService");
+    DocumentSnapshot<Object?> snapshot = await teamCollection.doc(uid).get();
+
+    if (snapshot.exists) {
+      print("enter snapshot.exists - TeamService");
+      // If the document exists, create a CrewUser object from the snapshot
+      return Team.fromSnapshot(
+          snapshot as DocumentSnapshot<Map<String, dynamic>>);
+    } else {
+      // If the document does not exist, return a default or handle accordingly
+      throw Exception('Unable to fetch team'); // Throw an exception
+    }
   }
 
   // in Position
   Future<void> updatePosition(String crewUid) async {
     print("entered updatePosition - TeamService");
-    print("squadUid: $squadUid");
-    await teamCollection.doc(squadUid).update({
+    print("squadUid: $uid");
+    await teamCollection.doc(uid).update({
       'position': FieldValue.arrayUnion([crewUid]),
     });
     print('crewUid appended to position successfully: $crewUid');

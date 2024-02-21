@@ -27,13 +27,13 @@ class LeaderDatabaseService {
     });
   }
 
-  Future updateUserData(String firstName, String lastName, String role) async {
-    return await leadersCollection.doc(uid).set({
-      'first name': firstName,
-      'last name': lastName,
-      'role': role,
-    });
-  }
+  // Future updateUserData(String firstName, String lastName, String role) async {
+  //   return await leadersCollection.doc(uid).set({
+  //     'first name': firstName,
+  //     'last name': lastName,
+  //     'role': role,
+  //   });
+  // }
 
   Future updateLeaderState(bool state) async {
     print("entered updateLeaderState");
@@ -114,6 +114,47 @@ class LeaderDatabaseService {
         duration: Duration(seconds: 2),
       ),
     );
+  }
+
+  // get user details
+  Future<LeaderUser> getLeaderUserDetails() async {
+    try {
+      DocumentSnapshot<Object?> snapshot = await leadersCollection.doc(uid).get();
+
+      if (snapshot.exists) {
+        // If the document exists, create a CrewUser object from the snapshot
+        return LeaderUser.fromSnapshot(
+            snapshot as DocumentSnapshot<Map<String, dynamic>>);
+      } else {
+        // If the document does not exist, return a default or handle accordingly
+        print('Document with UID $uid does not exist');
+        return LeaderUser(
+          uid: uid,
+          firstName: '',
+          lastName: '',
+          role: '',
+          hasTeam: '',
+          teamUid: '',
+        );
+      }
+    } catch (e) {
+      // Handle errors
+      print("Error getting crew user details: $e");
+      // You might want to throw an exception or handle it in a way that suits your app's needs
+      return LeaderUser(
+          uid: uid,
+          firstName: '',
+          lastName: '',
+          role: '',
+          hasTeam: '',
+          teamUid: '',
+        );
+    }
+  }
+
+  // Update user data
+  Future<void> updateLeaderUserData(LeaderUser leaderUser) async {
+    await leadersCollection.doc(uid).update(leaderUser.toJson());
   }
 
   // // user data from snapshots

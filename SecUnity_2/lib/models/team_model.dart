@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 
-class Team {
+class Team extends Equatable {
   final String uid;
   final String name;
   final String city;
@@ -9,8 +10,10 @@ class Team {
   final List<String> position;
   bool alert = false;
 
-  Team(this.uid, this.name, this.city, this.leaderUid, this.members,
-      this.position, this.alert);
+  Team(this.uid, this.name, this.city, this.leaderUid, this.members, this.position, this.alert);
+
+  @override
+  List<Object?> get props => [uid, name, city, leaderUid, members, position, alert];
 
   toJson() {
     return {

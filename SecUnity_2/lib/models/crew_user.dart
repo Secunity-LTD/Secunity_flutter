@@ -1,9 +1,8 @@
 import 'dart:html';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:secunity_2/models/UserModel.dart';
+import 'package:equatable/equatable.dart';
 
-class CrewUser {
+class CrewUser extends Equatable {
   final String? uid;
   final String firstName;
   final String lastName;
@@ -20,6 +19,10 @@ class CrewUser {
     required this.teamUid,
   });
 
+  @override
+  List<Object?> get props => [uid, firstName, lastName, role, leaderUid, teamUid];
+
+
   toJson() {
     return {
       'first name': firstName,
@@ -29,6 +32,9 @@ class CrewUser {
       'team uid': teamUid,
     };
   }
+
+  // @override
+  // List<Object?> get props => [leaderUid, teamUid];
 
   // // Map CrewUser object from firebase snapshot
   // factory CrewUser.fromSnapshot(
@@ -54,5 +60,6 @@ class CrewUser {
     teamUid: data['team uid'] ?? "", // Provide default value or handle null
   );
 }
+
 
 }
