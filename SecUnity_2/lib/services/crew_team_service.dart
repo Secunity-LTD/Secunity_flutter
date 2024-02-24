@@ -13,7 +13,7 @@ class CrewTeamService {
 
   // Constructor
   CrewTeamService(String leaderUid)
-      : teamService = TeamService(uid: leaderUid, teamUid: '') {
+      : teamService = TeamService(uid: leaderUid) {
     print("entered CrewTeamService constructor");
     print("teamUid: ${teamService.uid}");
   }

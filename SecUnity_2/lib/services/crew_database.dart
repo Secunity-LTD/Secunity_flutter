@@ -1,7 +1,5 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:secunity_2/models/crew_user.dart';
 
 class CrewDatabaseService {
@@ -31,6 +29,7 @@ class CrewDatabaseService {
           role: '',
           leaderUid: '',
           teamUid: '',
+          realTimeAlert: false,
         );
       }
     } catch (e) {
@@ -44,6 +43,7 @@ class CrewDatabaseService {
         role: '',
         leaderUid: '',
         teamUid: '',
+        realTimeAlert: false,
       );
     }
   }
@@ -61,9 +61,27 @@ class CrewDatabaseService {
       'role': role,
       'team uid': '',
       'leader uid': '',
+      'real time alert': false
     });
   }
 
+  // update alert status
+  Future<void> updateAlertStatus() async {
+    print("entered updateAlertStatus");
+    CrewUser crewUser = await getCrewUserDetails();
+    print("crewUser.uid: ${crewUser.uid}");
+    print("crewUser.realTimeAlert: ${crewUser.realTimeAlert}");
+    if (crewUser.realTimeAlert == false) {
+      await crewCollection.doc(uid).update({
+        'real time alert': true,
+      });
+    } else {
+      await crewCollection.doc(uid).update({
+        'real time alert': false,
+      });
+    }
+    ;
+  }
 
   Future updateTeamUid(String leaderUid) async {
     print("entered updateTeamUid");
@@ -97,7 +115,7 @@ class CrewDatabaseService {
   // Get Stream of Team
   Stream<CrewUser> getCrewUserStream() {
     return crewCollection.doc(uid).snapshots().map((snapshot) =>
-        CrewUser.fromSnapshot(snapshot as DocumentSnapshot<Map<String, dynamic>>));
+        CrewUser.fromSnapshot(
+            snapshot as DocumentSnapshot<Map<String, dynamic>>));
   }
-  
 }

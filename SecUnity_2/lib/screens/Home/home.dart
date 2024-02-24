@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
           .collection('leaders')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
-
+    
       if (leaderSnapshot.exists) {
         // User is a leader, navigate to LeaderScreen
         Navigator.pushReplacement(

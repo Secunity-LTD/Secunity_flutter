@@ -24,6 +24,7 @@ class LeaderDatabaseService {
       'role': role,
       'has a team': false,
       'team uid': '',
+      'real time alert': false
     });
   }
 
@@ -135,6 +136,7 @@ class LeaderDatabaseService {
           role: '',
           hasTeam: '',
           teamUid: '',
+          realTimeAlert: false,
         );
       }
     } catch (e) {
@@ -148,6 +150,7 @@ class LeaderDatabaseService {
         role: '',
         hasTeam: '',
         teamUid: '',
+        realTimeAlert: false,
       );
     }
   }
@@ -183,19 +186,26 @@ class LeaderDatabaseService {
     // }
   }
 
-  // // get user doc stream
-  // Stream<LeaderUser> get userData {
-  //   return leadersCollection.doc(uid).snapshots()
-  //       .map(_userDataFromSnapshot);
-  // }
-
-  // // get user doc stream
-  // Stream<DocumentSnapshot> get userData {
-  //   return leadersCollection.doc(uid).snapshots()
-  //       .map(_userDataFromSnapshot);
-  // }
 // get user doc stream
   Stream<UserData>? get userData {
     return leadersCollection.doc(uid).snapshots().map(_userDataFromSnapshot);
+  }
+
+  // update alert status
+  Future<void> updateAlertStatus() async {
+    print("entered updateAlertStatus");
+    LeaderUser leaderUser = await getLeaderUserDetails();
+    print("leaderUser.uid: ${leaderUser.uid}");
+    print("leaderUser.realTimeAlert: ${leaderUser.realTimeAlert}");
+    if (leaderUser.realTimeAlert == false) {
+      await leadersCollection.doc(uid).update({
+        'real time alert': true,
+      });
+    } else {
+      await leadersCollection.doc(uid).update({
+        'real time alert': false,
+      });
+    }
+    ;
   }
 }

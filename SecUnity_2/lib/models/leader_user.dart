@@ -8,6 +8,7 @@ class LeaderUser {
   bool hasTeam = false;
   final String role;
   String teamUid;
+  bool realTimeAlert = false;
 
   LeaderUser({
     required this.uid,
@@ -16,6 +17,7 @@ class LeaderUser {
     required this.role,
     required hasTeam,
     required this.teamUid,
+    required this.realTimeAlert,
   });
 
   toJson() {
@@ -25,6 +27,7 @@ class LeaderUser {
       'has_team': hasTeam,
       'role': role,
       'team_uid': teamUid,
+      'real time alert': realTimeAlert,
     };
   }
 
@@ -39,6 +42,7 @@ class LeaderUser {
       role: data['role'] ?? "", // Provide default value or handle null
       hasTeam: data['has a team'] ?? "", // Provide default value or handle null
       teamUid: data['team uid'] ?? "", // Provide default value or handle null
+      realTimeAlert: data['real time alert'] ?? false,
     );
   }
 }

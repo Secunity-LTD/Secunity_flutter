@@ -19,7 +19,7 @@ class PositionScreenState extends State<PositionScreen> {
   @override
   void initState() {
     super.initState();
-    teamService = TeamService(uid: widget.teamUid, teamUid: '');
+    teamService = TeamService(uid: widget.teamUid);
   }
 
   @override

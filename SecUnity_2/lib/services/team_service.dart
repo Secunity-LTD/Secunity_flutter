@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:secunity_2/models/crew_user.dart';
 import 'package:secunity_2/models/team_model.dart';
 import 'package:secunity_2/services/crew_database.dart';
+import 'package:secunity_2/services/leader_database.dart';
 
 class TeamService {
   String uid;
@@ -12,7 +13,7 @@ class TeamService {
   final CollectionReference teamCollection =
       FirebaseFirestore.instance.collection('squads');
 
-  TeamService({required this.uid, required String teamUid});
+  TeamService({required this.uid});
 
   FutureOr<Team> getTeamDetails() async {
     print("entered getTeamDetails - TeamService");
@@ -63,5 +64,24 @@ class TeamService {
       'position': [],
     });
     print('position cleared successfully');
+  }
+
+  Future<void> sendRealTimeAlert() async {
+    print("entered sendRealTimeAlert - TeamService");
+    Team team = await getTeamDetails();
+
+    // Create CrewDatabaseService objects for each crew UID
+    final List<CrewDatabaseService> crewServices = team.members
+        .map((crewUid) => CrewDatabaseService(uid: crewUid))
+        .toList();
+    // Create LeaderDatabaseService objects for leader UID
+    final LeaderDatabaseService leaderService =
+        LeaderDatabaseService(uid: team.leaderUid);
+
+    // updateAlertStatus for each crew member
+    Future.wait(
+        crewServices.map((crewService) => crewService.updateAlertStatus()));
+    // updateAlertStatus for leader
+    leaderService.updateAlertStatus();
   }
 }
