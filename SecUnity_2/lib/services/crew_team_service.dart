@@ -4,21 +4,19 @@ import 'package:secunity_2/constants/leader_style.dart';
 import 'package:secunity_2/services/leader_database.dart';
 import 'package:secunity_2/services/team_service.dart';
 
-
 class CrewTeamService {
-  late TeamService teamService;
-  
+  TeamService teamService;
+
   // // collection reference
   // final CollectionReference teamCollection =
   //     FirebaseFirestore.instance.collection('squads');
 
   // Constructor
-  CrewTeamService(String leaderUid) {
+  CrewTeamService(String leaderUid)
+      : teamService = TeamService(uid: leaderUid, teamUid: '') {
     print("entered CrewTeamService constructor");
-    teamService = TeamService(uid: leaderUid);
     print("teamUid: ${teamService.uid}");
-  } 
-
+  }
 
   // update position
   Future<void> updatePosition(String crewUid) async {
@@ -29,5 +27,4 @@ class CrewTeamService {
       print('Error updating position: $e');
     }
   }
-
 }

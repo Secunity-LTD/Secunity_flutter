@@ -27,13 +27,12 @@ class LeaderDatabaseService {
     });
   }
 
-  // Future updateUserData(String firstName, String lastName, String role) async {
-  //   return await leadersCollection.doc(uid).set({
-  //     'first name': firstName,
-  //     'last name': lastName,
-  //     'role': role,
-  //   });
-  // }
+  // Get Stream of LeaderUser
+  Stream<LeaderUser> getLeaderUserStream() {
+    return leadersCollection.doc(uid).snapshots().map((snapshot) =>
+        LeaderUser.fromSnapshot(
+            snapshot as DocumentSnapshot<Map<String, dynamic>>));
+  }
 
   Future updateLeaderState(bool state) async {
     print("entered updateLeaderState");
@@ -119,7 +118,8 @@ class LeaderDatabaseService {
   // get user details
   Future<LeaderUser> getLeaderUserDetails() async {
     try {
-      DocumentSnapshot<Object?> snapshot = await leadersCollection.doc(uid).get();
+      DocumentSnapshot<Object?> snapshot =
+          await leadersCollection.doc(uid).get();
 
       if (snapshot.exists) {
         // If the document exists, create a CrewUser object from the snapshot
@@ -142,13 +142,13 @@ class LeaderDatabaseService {
       print("Error getting crew user details: $e");
       // You might want to throw an exception or handle it in a way that suits your app's needs
       return LeaderUser(
-          uid: uid,
-          firstName: '',
-          lastName: '',
-          role: '',
-          hasTeam: '',
-          teamUid: '',
-        );
+        uid: uid,
+        firstName: '',
+        lastName: '',
+        role: '',
+        hasTeam: '',
+        teamUid: '',
+      );
     }
   }
 
@@ -156,46 +156,6 @@ class LeaderDatabaseService {
   Future<void> updateLeaderUserData(LeaderUser leaderUser) async {
     await leadersCollection.doc(uid).update(leaderUser.toJson());
   }
-
-  // // user data from snapshots
-  // UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
-  //   Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
-  //
-  //   if (data == null) {
-  //     // Handle the case where there's no data in the snapshot
-  //     // You can return a default UserData or throw an exception, depending on your requirements
-  //     return UserData(uid: uid, firstName: '', lastName: '', role: '');
-  //   }
-  //
-  //   return UserData(
-  //     uid: uid,
-  //     firstName: data['first name'] ?? '',
-  //     lastName: data['last name'] ?? '',
-  //     role: data['role'] ?? '', // 'role' is now a String
-  //   );
-  // }
-  // user data from snapshots
-  // UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
-  //   // Check if the snapshot contains data and data exists
-  //   if (snapshot.exists) {
-  //     Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
-  //
-  //     // Access data using keys
-  //     String firstName = data['first name'] ?? '';
-  //     String lastName = data['last name'] ?? '';
-  //     String role = data['role'] ?? '';
-  //
-  //     return UserData(
-  //       uid: uid,
-  //       firstName: firstName,
-  //       lastName: lastName,
-  //       role: role,
-  //     );
-  //   } else {
-  //     // Handle the case where the document doesn't exist
-  //     return UserData(uid: uid, firstName: '', lastName: '', role: '');
-  //   }
-  // }
 
   // user data from snapshots
   UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {

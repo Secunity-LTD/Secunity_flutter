@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/models/leader_user.dart';
 import 'package:secunity_2/screens/home/positions_screen.dart';
+import 'package:secunity_2/screens/leader/positions.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:secunity_2/models/userModel.dart';
@@ -542,14 +543,15 @@ class _LeaderPageState extends State<LeaderScreen> {
                                 children: [
                                   ElevatedButton(
                                     onPressed: () {
-            // Navigate to the Position screen and pass squadUid
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PositionChartPage(squadUid: leaderUser.teamUid),
-              ),
-            );
-          },
+                                      // Navigate to the Position screen and pass squadUid
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PositionScreen(
+                                              teamUid: leaderUser.teamUid),
+                                        ),
+                                      );
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: LeaderStyles.buttonColor,
                                     ),

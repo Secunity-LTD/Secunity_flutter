@@ -12,14 +12,6 @@ class CrewDatabaseService {
   final CollectionReference crewCollection =
       FirebaseFirestore.instance.collection('crew');
 
-  final StreamController<CrewUser> _crewUserController =
-                                  StreamController<CrewUser>.broadcast();
-
-  Stream<CrewUser> get crewUserStream => _crewUserController.stream;
-
-  void dispose() {
-    _crewUserController.close();
-  }
   // get user details
   Future<CrewUser> getCrewUserDetails() async {
     try {
@@ -101,4 +93,11 @@ class CrewDatabaseService {
       return null;
     }
   }
+
+  // Get Stream of Team
+  Stream<CrewUser> getCrewUserStream() {
+    return crewCollection.doc(uid).snapshots().map((snapshot) =>
+        CrewUser.fromSnapshot(snapshot as DocumentSnapshot<Map<String, dynamic>>));
+  }
+  
 }
