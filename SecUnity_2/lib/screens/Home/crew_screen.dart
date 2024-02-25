@@ -26,7 +26,7 @@ class _CrewPageState extends State<CrewScreen> {
   List<List<TextEditingController>> taskControllers = [];
   String firstName = '';
   String teamName = '';
-  bool isInPosition = false;
+  // bool isInPosition = false;
   bool _isLoading = true;
   bool _hasTeam = false;
   String crewUid = '';
@@ -536,10 +536,11 @@ class _CrewPageState extends State<CrewScreen> {
                                                     crewUser.uid!);
                                               },
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: isInPosition
-                                                    ? Colors.green
-                                                    : const Color.fromARGB(
-                                                        255, 41, 48, 96),
+                                                backgroundColor:
+                                                    crewUser.inPosition
+                                                        ? Colors.green
+                                                        : const Color.fromARGB(
+                                                            255, 41, 48, 96),
                                               ),
                                               child: const Text(
                                                 'InPosition',
