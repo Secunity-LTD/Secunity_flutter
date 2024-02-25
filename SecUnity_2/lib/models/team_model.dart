@@ -9,8 +9,7 @@ class Team {
   final List<String> position;
   bool realTimeAlert = false;
 
-  Team(this.uid, this.name, this.city, this.leaderUid, this.members,
-      this.position, this.realTimeAlert);
+  Team(this.uid, this.name, this.city, this.leaderUid, this.members, this.position, this.alert);
 
   Map<String, dynamic> toJson() {
     return {
@@ -37,13 +36,13 @@ class Team {
     );
   }
 
-  static Team fromJson(Map<String, dynamic> data) => Team(
-        data['uid'],
-        data['squad_name'],
-        data['city'],
-        data['leader'],
-        List<String>.from(data['members']),
-        List<String>.from(data['position']),
-        data['real time alert'],
-      );
+  static Team fromJson(Map<String,dynamic> data) => Team(
+    data['uid'],
+    data['squad_name'],
+    data['city'],
+    data['leader'],
+    List<String>.from(data['members']),
+    List<String>.from(data['position']),
+    data['alert'],
+  );
 }

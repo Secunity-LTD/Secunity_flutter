@@ -2,13 +2,12 @@
 
 import 'dart:async';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:secunity_2/constants/leader_style.dart';
 import 'package:secunity_2/models/crew_user.dart';
-import 'package:secunity_2/models/team_model.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/crew_style.dart';
 import 'package:secunity_2/services/crew_database.dart';
@@ -45,6 +44,11 @@ class _CrewPageState extends State<CrewScreen> {
 
   void initState() {
     super.initState();
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
     _fetchData();
     crewDatabaseService = CrewDatabaseService(uid: user!.uid);
   }
@@ -123,60 +127,6 @@ class _CrewPageState extends State<CrewScreen> {
       }
     } catch (e) {
       print('Error fetching user name: $e');
-    }
-  }
-
-  void TogglePosition() async {
-    try {
-      print("enter toggle position");
-      // Query Firestore to get the squad document where the current user is a member
-      QuerySnapshot squadSnapshot = await FirebaseFirestore.instance
-          .collection('squads')
-          .where(
-              'members.${FirebaseAuth.instance.currentUser!.uid}.requester_id',
-              isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .get();
-
-      if (squadSnapshot.docs.isNotEmpty) {
-        print("enter if squadSnapshot.docs.isNotEmpty");
-        String squadId = squadSnapshot.docs.first.id;
-        print("squadId: $squadId");
-        // Get the reference to the squad document
-        DocumentReference squadRef =
-            FirebaseFirestore.instance.collection('squads').doc(squadId);
-
-        // Get the current members array
-        DocumentSnapshot squadDoc = await squadRef.get();
-        List<dynamic> members =
-            (squadDoc.data() as Map<String, dynamic>)['members'];
-
-        // Find the index of the current user's ID in the members array
-        int index = members.indexWhere((element) =>
-            element['requester_id'] == FirebaseAuth.instance.currentUser!.uid);
-
-        if (index != -1) {
-          // Update the status for the current user
-          members[index]['status'] =
-              isInPosition ? 'In Position' : 'Not In Position';
-
-          // Create a new map with the updated members array
-          Map<String, dynamic> updatedData = {'members': members};
-
-          // Update the 'members' field in the squad document
-          await squadRef.update(updatedData);
-          print('Position updated successfully!');
-        } else {
-          print('User not found in the members array.');
-        }
-      } else {
-        print('You are not a member of any squad.');
-      }
-
-      setState(() {
-        isInPosition = !isInPosition;
-      });
-    } catch (e) {
-      print('Error: $e');
     }
   }
 
@@ -308,6 +258,17 @@ class _CrewPageState extends State<CrewScreen> {
     }
   }
 
+  triggerNotification() async {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 10,
+        channelKey: 'basic_channel',
+        title: 'Emergency Alert',
+        body: 'There is an emergency in your area!',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = this.user;
@@ -351,6 +312,9 @@ class _CrewPageState extends State<CrewScreen> {
                       print("crewUser.teamUid: ${crewUser.teamUid}");
                       print("crewUser.leaderUid: ${crewUser.leaderUid}");
                       print("crewUser.role: ${crewUser.role}");
+                      if (crewUser.realTimeAlert) {
+                        triggerNotification();
+                      }
                       return Scaffold(
                         body: Container(
                           width: double.infinity,
@@ -523,10 +487,8 @@ class _CrewPageState extends State<CrewScreen> {
                                               .sendRealTimeAlert();
                                         },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: crewUser
-                                                  .realTimeAlert
-                                              ? Colors.yellow
-                                              : LeaderStyles.alertButtonColor,
+                                          backgroundColor:
+                                              LeaderStyles.alertButtonColor,
                                         ), //Set button color to dark red
                                         child: const Text(
                                           'Real Time Alert',
@@ -537,79 +499,81 @@ class _CrewPageState extends State<CrewScreen> {
                                       ),
                                       const SizedBox(height: 14),
                                       // Additional buttons
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Handle button press
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  const Color.fromARGB(
-                                                255,
-                                                41,
-                                                48,
-                                                96,
-                                              ), // Set button color to dark red
-                                            ),
-                                            child: const Text(
-                                              'Requests',
-                                              style: TextStyle(
-                                                color: Colors.white,
+                                      if (_hasTeam)
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Handle button press
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    const Color.fromARGB(
+                                                  255,
+                                                  41,
+                                                  48,
+                                                  96,
+                                                ), // Set button color to dark red
+                                              ),
+                                              child: const Text(
+                                                'Requests',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // TogglePosition();
-                                              print("enter onPressd position");
-                                              CrewTeamService crewTeamService =
-                                                  CrewTeamService(
-                                                      crewUser.teamUid);
-                                              crewTeamService.updatePosition(
-                                                  crewUser.uid!);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: isInPosition
-                                                  ? Colors.green
-                                                  : const Color.fromARGB(
-                                                      255, 41, 48, 96),
-                                            ),
-                                            child: const Text(
-                                              'InPosition',
-                                              style: TextStyle(
-                                                color: Colors.white,
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                print(
+                                                    "enter onPressd position");
+                                                CrewTeamService
+                                                    crewTeamService =
+                                                    CrewTeamService(
+                                                        crewUser.teamUid);
+                                                crewTeamService.updatePosition(
+                                                    crewUser.uid!);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: isInPosition
+                                                    ? Colors.green
+                                                    : const Color.fromARGB(
+                                                        255, 41, 48, 96),
+                                              ),
+                                              child: const Text(
+                                                'InPosition',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // TogglePosition();
-                                              // print("enter onPressd position");
-                                              // CrewTeamService crewTeamService =
-                                              //     CrewTeamService(
-                                              //         crewUser.teamUid);
-                                              // crewTeamService.updatePosition(
-                                              //     crewUser.uid!);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  crewUser.realTimeAlert
-                                                      ? Colors.red
-                                                      : const Color.fromARGB(
-                                                          255, 41, 48, 96),
-                                            ),
-                                            child: const Text(
-                                              'Emergency',
-                                              style: TextStyle(
-                                                color: Colors.white,
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // TogglePosition();
+                                                // print("enter onPressd position");
+                                                // CrewTeamService crewTeamService =
+                                                //     CrewTeamService(
+                                                //         crewUser.teamUid);
+                                                // crewTeamService.updatePosition(
+                                                //     crewUser.uid!);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    crewUser.realTimeAlert
+                                                        ? Colors.red
+                                                        : const Color.fromARGB(
+                                                            255, 41, 48, 96),
+                                              ),
+                                              child: const Text(
+                                                'Emergency',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
+                                          ],
+                                        ),
                                       const SizedBox(height: 14),
                                       if (!_hasTeam)
                                         TextField(

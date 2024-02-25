@@ -3,12 +3,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:secunity_2/models/crew_user.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:secunity_2/constants/crew_style.dart';
 import 'package:secunity_2/services/crew_database.dart';
-import 'package:secunity_2/services/team_service.dart';
 
 class CrewScreen extends StatefulWidget {
   @override

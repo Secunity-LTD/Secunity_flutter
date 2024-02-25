@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +27,20 @@ void main() async {
       appId: "1:1095188614950:android:1d64fa09d1a0ecf70abbe7",
     ),
   );
+
+  AwesomeNotifications().initialize(
+    null,
+    [
+      NotificationChannel(
+        channelKey: 'basic_channel',
+        channelName: 'Emergency Alert',
+        channelDescription: 'Notification channel for basic tests',
+        defaultColor: Color.fromARGB(255, 224, 17, 17),
+        ledColor: Colors.white,
+      )
+    ],
+  );
+
   runApp(const MyApp());
 }
 
@@ -42,8 +57,11 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             // Define routes
             routes: {
-              '/sign_up': (context) => SignUp(toggleView: () {}), // Assuming SignUp is your sign-up page widget
-              '/sign_in': (context) => SignIn(toggleView: () {}), // Your sign-in page widget
+              '/sign_up': (context) => SignUp(
+                  toggleView:
+                      () {}), // Assuming SignUp is your sign-up page widget
+              '/sign_in': (context) =>
+                  SignIn(toggleView: () {}), // Your sign-in page widget
               '/login': (context) => SignIn(
                     toggleView: () {},
                   ),

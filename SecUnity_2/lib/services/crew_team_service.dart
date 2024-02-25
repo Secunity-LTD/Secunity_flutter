@@ -20,7 +20,6 @@ class CrewTeamService {
 
   // update position
   Future<void> updatePosition(String crewUid) async {
-    print("entered updatePosition");
     try {
       return await teamService.updatePosition(crewUid);
     } catch (e) {
