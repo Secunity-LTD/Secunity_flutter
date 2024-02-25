@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/models/leader_user.dart';
 import 'package:secunity_2/models/team_model.dart';
 import 'package:secunity_2/screens/home/positions_screen.dart';
+import 'package:secunity_2/screens/leader/crew_members.dart';
 import 'package:secunity_2/screens/leader/positions.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:provider/provider.dart';
