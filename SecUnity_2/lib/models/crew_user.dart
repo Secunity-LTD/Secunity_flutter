@@ -8,6 +8,7 @@ class CrewUser {
   String leaderUid;
   String teamUid;
   bool realTimeAlert;
+  bool inPosition;
 
   CrewUser({
     required this.uid,
@@ -17,6 +18,7 @@ class CrewUser {
     required this.leaderUid,
     required this.teamUid,
     required this.realTimeAlert,
+    required this.inPosition,
   });
 
   Map<String, dynamic> toJson() => {
@@ -26,6 +28,7 @@ class CrewUser {
         'leader uid': leaderUid,
         'team uid': teamUid,
         'real time alert': realTimeAlert,
+        'in position': inPosition,
       };
 
   // Map CrewUser object from firebase snapshot
@@ -42,6 +45,7 @@ class CrewUser {
           data['leader uid'] ?? "", // Provide default value or handle null
       teamUid: data['team uid'] ?? "", // Provide default value or handle null
       realTimeAlert: data['real time alert'] ?? false,
+      inPosition: data['in position'] ?? false,
     );
   }
 
@@ -54,6 +58,7 @@ class CrewUser {
           leaderUid: json['leader uid'],
           teamUid: json['team uid'],
           realTimeAlert: json['real time alert'],
+          inPosition: json['in position'],
         ),
       };
 }

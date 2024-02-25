@@ -37,6 +37,7 @@ class TeamService {
     await teamCollection.doc(uid).update({
       'position': FieldValue.arrayUnion([crewUid]),
     });
+    await CrewDatabaseService(uid: crewUid).updateInPositionStatus();
     print('crewUid appended to position successfully: $crewUid');
   }
 
