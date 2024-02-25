@@ -547,7 +547,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                                       SizedBox(height: 14),
                                       ElevatedButton(
                                         onPressed: () {
-                                          // Handle Real Time Alert button press 
+                                          // Handle Real Time Alert button press
                                           TeamService(uid: leaderUser.teamUid)
                                               .sendRealTimeAlert();
                                         },
@@ -564,49 +564,50 @@ class _LeaderPageState extends State<LeaderScreen> {
                                         ),
                                       ),
                                       SizedBox(height: 14),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Navigate to the Position screen and pass squadUid
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      PositionScreen(
-                                                          teamUid: leaderUser
-                                                              .teamUid),
-                                                ),
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  LeaderStyles.buttonColor,
+                                      if (squadCreated)
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Navigate to the Position screen and pass squadUid
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PositionScreen(
+                                                            teamUid: leaderUser
+                                                                .teamUid),
+                                                  ),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    LeaderStyles.buttonColor,
+                                              ),
+                                              child: Text(
+                                                'Positions',
+                                                style: LeaderStyles
+                                                    .buttonText, // Use buttonText style here
+                                              ),
                                             ),
-                                            child: Text(
-                                              'Positions',
-                                              style: LeaderStyles
-                                                  .buttonText, // Use buttonText style here
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                // Handle button press
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    LeaderStyles.buttonColor,
+                                              ),
+                                              child: Text(
+                                                'Crew Requests',
+                                                style: LeaderStyles
+                                                    .buttonText, // Use buttonText style here
+                                              ),
                                             ),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              // Handle button press
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  LeaderStyles.buttonColor,
-                                            ),
-                                            child: Text(
-                                              'Crew Requests',
-                                              style: LeaderStyles
-                                                  .buttonText, // Use buttonText style here
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                          ],
+                                        ),
                                       SizedBox(height: 20),
                                       squadCreated
                                           ? _buildJoinRequestsDropdown()

@@ -72,6 +72,7 @@ class PositionScreenState extends State<PositionScreen> {
                 ],
               );
             } else {
+              print("No data");
               return const Center(child: CircularProgressIndicator());
             }
           }),

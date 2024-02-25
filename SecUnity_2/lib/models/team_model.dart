@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
-class Team  {
+class Team {
   final String uid;
   final String name;
   final String city;
@@ -10,7 +10,8 @@ class Team  {
   final List<String> position;
   bool alert = false;
 
-  Team(this.uid, this.name, this.city, this.leaderUid, this.members, this.position, this.alert);
+  Team(this.uid, this.name, this.city, this.leaderUid, this.members,
+      this.position, this.alert);
 
   Map<String, dynamic> toJson() {
     return {
@@ -37,13 +38,13 @@ class Team  {
     );
   }
 
-  static Team fromJson(Map<String,dynamic> data) => Team(
-    data['uid'],
-    data['squad_name'],
-    data['city'],
-    data['leader'],
-    List<String>.from(data['members']),
-    List<String>.from(data['position']),
-    data['alert'],
-  );
+  static Team fromJson(Map<String, dynamic> data) => Team(
+        data['uid'],
+        data['squad_name'],
+        data['city'],
+        data['leader'],
+        List<String>.from(data['members']),
+        List<String>.from(data['position']),
+        data['alert'],
+      );
 }
