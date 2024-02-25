@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:secunity_2/models/UserModel.dart';
 
 class LeaderUser {
   final String? uid;

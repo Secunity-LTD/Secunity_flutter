@@ -3,21 +3,18 @@ import 'package:secunity_2/constants/leader_style.dart';
 import 'package:secunity_2/models/crew_user.dart';
 import 'package:secunity_2/models/team_model.dart';
 import 'package:secunity_2/services/team_service.dart';
-import '../../constants/positions _style.dart';
-import 'dart:ui';
 
-class PositionScreen extends StatefulWidget {
+class CrewMembersScreen extends StatefulWidget {
   String teamUid;
-  PositionScreen({Key? key, required this.teamUid}) : super(key: key);
+  CrewMembersScreen({super.key, required this.teamUid});
 
   @override
-  State<PositionScreen> createState() => PositionScreenState();
+  State<CrewMembersScreen> createState() => CrewMembersScreenState();
 }
 
-class PositionScreenState extends State<PositionScreen> {
+class CrewMembersScreenState extends State<CrewMembersScreen> {
   TeamService? teamService;
-  bool _isLoading = false;
-  List<String> crewUids = [];
+  // List<String> crewUids = [];
 
   @override
   void initState() {
@@ -27,36 +24,12 @@ class PositionScreenState extends State<PositionScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      // If loading, show a loading indicator with gradient background
-      return Scaffold(
-        backgroundColor: PositionStyles.backgroundColor1,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Colors.white, // Set color of the circular progress indicator
-            ),
-          ),
-        ),
-      );
-    }
     return Scaffold(
-      backgroundColor: PositionStyles.backgroundColor1,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              PositionStyles.backgroundColor1,
-              PositionStyles.backgroundColor2,
-              PositionStyles.backgroundColor3,
-              PositionStyles.backgroundColor4,
-              PositionStyles.backgroundColor5,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: StreamBuilder<Team>(
+      appBar: AppBar(
+        title: const Text('Crew Members'),
+        backgroundColor: Colors.blue[900],
+      ),
+      body: StreamBuilder<Team>(
           stream: teamService!.getTeamStream(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -67,7 +40,7 @@ class PositionScreenState extends State<PositionScreen> {
                 children: [
                   Expanded(
                     child: FutureBuilder<List<CrewUser>>(
-                      future: teamService!.getCrewList(team.position),
+                      future: teamService!.getCrewList(team.members),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           final crewList = snapshot.data!;
@@ -85,33 +58,36 @@ class PositionScreenState extends State<PositionScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      teamService!.clearPositions();
+                      teamService!.clearAllCrew();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: LeaderStyles.buttonColor,
                     ),
                     child: Text(
-                      'Clear Positions',
-                      style: LeaderStyles.buttonText, // Use buttonText style here
+                      'Delete all crew',
+                      style:
+                          LeaderStyles.buttonText, // Use buttonText style here
                     ),
                   ),
                 ],
               );
             } else {
-              print("No data");
               return const Center(child: CircularProgressIndicator());
             }
-          },
-        ),
-      ),
+          }),
     );
   }
 
-  // Widget for presenting crew member in the list
+  // Widget for present crew member in the list
   Widget buildPositionList(CrewUser crewUser) {
     return ListTile(
       title: Text('${crewUser.firstName} ${crewUser.lastName}'),
       subtitle: Text(crewUser.role),
+      trailing: const Icon(Icons.delete),
+      onTap: () {
+
+       teamService!.deleteCrew(crewUser.uid!);
+      },
     );
   }
 }

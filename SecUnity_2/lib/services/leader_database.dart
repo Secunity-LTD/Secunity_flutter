@@ -90,7 +90,7 @@ class LeaderDatabaseService {
             'leader': uid,
             'members': [],
             'position': [],
-            'alert': false,
+            'real time alert': false,
           });
           // this.squadUid = documentReference.id;
           // print("squadUid: $squadUid");

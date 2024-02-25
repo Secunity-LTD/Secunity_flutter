@@ -30,6 +30,7 @@ class CrewDatabaseService {
           leaderUid: '',
           teamUid: '',
           realTimeAlert: false,
+          inPosition: false,
         );
       }
     } catch (e) {
@@ -44,6 +45,7 @@ class CrewDatabaseService {
         leaderUid: '',
         teamUid: '',
         realTimeAlert: false,
+        inPosition: false,
       );
     }
   }
@@ -61,7 +63,8 @@ class CrewDatabaseService {
       'role': role,
       'team uid': '',
       'leader uid': '',
-      'real time alert': false
+      'real time alert': false,
+      'in position': false,
     });
   }
 
@@ -81,6 +84,39 @@ class CrewDatabaseService {
       });
     }
     ;
+  }
+
+  // update position status
+  updateInPositionStatus() async {
+    print("entered updateInPositionStatus");
+    CrewUser crewUser = await getCrewUserDetails();
+    print("crewUser.uid: ${crewUser.uid}");
+    print("crewUser.inPosition: ${crewUser.inPosition}");
+    if (crewUser.inPosition == false) {
+      await crewCollection.doc(uid).update({
+        'in position': true,
+      });
+    } else {
+      await crewCollection.doc(uid).update({
+        'in position': false,
+      });
+    }
+    ;
+  }
+
+  // Delete crew member from a team
+  Future<void> unassignTeam() async {
+    print("entered updateAlertStatus");
+    CrewUser crewUser = await getCrewUserDetails();
+    print("crewUser.uid: ${crewUser.uid}");
+    print("crewUser.teamUid before: ${crewUser.teamUid}");
+    await crewCollection.doc(uid).update({
+      'team uid': '',
+      'leader uid': '',
+      'real time alert': false,
+      'in position': false,
+    });
+    print("crewUser.teamUid after: ${crewUser.teamUid}");
   }
 
   Future updateTeamUid(String leaderUid) async {

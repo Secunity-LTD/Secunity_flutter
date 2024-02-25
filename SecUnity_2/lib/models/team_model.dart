@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:equatable/equatable.dart';
 
-class Team  {
+class Team {
   final String uid;
   final String name;
   final String city;
   final String leaderUid;
   final List<String> members;
   final List<String> position;
-  bool alert = false;
+  bool realTimeAlert = false;
 
-  Team(this.uid, this.name, this.city, this.leaderUid, this.members, this.position, this.alert);
+  Team(this.uid, this.name, this.city, this.leaderUid, this.members,
+      this.position, this.realTimeAlert);
 
   Map<String, dynamic> toJson() {
     return {
@@ -19,7 +19,7 @@ class Team  {
       'leader': leaderUid,
       'members': members,
       'position': position,
-      'alert': alert,
+      'real time alert': realTimeAlert,
     };
   }
 
@@ -33,17 +33,17 @@ class Team  {
       data['leader'],
       List<String>.from(data['members']),
       List<String>.from(data['position']),
-      data['alert'],
+      data['real time alert'],
     );
   }
 
-  static Team fromJson(Map<String,dynamic> data) => Team(
-    data['uid'],
-    data['squad_name'],
-    data['city'],
-    data['leader'],
-    List<String>.from(data['members']),
-    List<String>.from(data['position']),
-    data['alert'],
-  );
+  static Team fromJson(Map<String, dynamic> data) => Team(
+        data['uid'],
+        data['squad_name'],
+        data['city'],
+        data['leader'],
+        List<String>.from(data['members']),
+        List<String>.from(data['position']),
+        data['alert'],
+      );
 }
