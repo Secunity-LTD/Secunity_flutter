@@ -611,21 +611,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                                                     LeaderStyles.buttonColor,
                                               ),
                                               child: Text(
-                                                'Crew Members List',
-                                                style: LeaderStyles
-                                                    .buttonText, // Use buttonText style here
-                                              ),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                // Handle button press
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    LeaderStyles.buttonColor,
-                                              ),
-                                              child: Text(
-                                                'Crew Requests',
+                                                'Crew List',
                                                 style: LeaderStyles
                                                     .buttonText, // Use buttonText style here
                                               ),
