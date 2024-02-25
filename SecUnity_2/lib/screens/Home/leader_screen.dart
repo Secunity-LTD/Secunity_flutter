@@ -595,6 +595,29 @@ class _LeaderPageState extends State<LeaderScreen> {
                                             ),
                                             ElevatedButton(
                                               onPressed: () {
+                                                // Navigate to the Position screen and pass squadUid
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        CrewMembersScreen(
+                                                            teamUid: leaderUser
+                                                                .teamUid),
+                                                  ),
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    LeaderStyles.buttonColor,
+                                              ),
+                                              child: Text(
+                                                'Crew Members List',
+                                                style: LeaderStyles
+                                                    .buttonText, // Use buttonText style here
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
                                                 // Handle button press
                                               },
                                               style: ElevatedButton.styleFrom(
