@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:secunity_2/models/leader_user.dart';
 import 'package:secunity_2/models/team_model.dart';
 import 'package:secunity_2/screens/home/positions_screen.dart';
+import 'package:secunity_2/screens/leader/crew_members.dart';
 import 'package:secunity_2/screens/leader/positions.dart';
 import 'package:secunity_2/services/auth_service.dart';
 import 'package:provider/provider.dart';
@@ -547,7 +548,7 @@ class _LeaderPageState extends State<LeaderScreen> {
                                       SizedBox(height: 14),
                                       ElevatedButton(
                                         onPressed: () {
-                                          // Handle Real Time Alert button press 
+                                          // Handle Real Time Alert button press
                                           TeamService(uid: leaderUser.teamUid)
                                               .sendRealTimeAlert();
                                         },
@@ -587,6 +588,29 @@ class _LeaderPageState extends State<LeaderScreen> {
                                             ),
                                             child: Text(
                                               'Positions',
+                                              style: LeaderStyles
+                                                  .buttonText, // Use buttonText style here
+                                            ),
+                                          ),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              // Navigate to the Position screen and pass squadUid
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      CrewMembersScreen(
+                                                          teamUid: leaderUser
+                                                              .teamUid),
+                                                ),
+                                              );
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  LeaderStyles.buttonColor,
+                                            ),
+                                            child: Text(
+                                              'Crew Members List',
                                               style: LeaderStyles
                                                   .buttonText, // Use buttonText style here
                                             ),
