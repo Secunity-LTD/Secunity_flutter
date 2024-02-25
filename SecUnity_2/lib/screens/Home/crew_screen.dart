@@ -490,8 +490,10 @@ class _CrewPageState extends State<CrewScreen> {
                                           crewTeamService.sendRealTimeAlert();
                                         },
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              LeaderStyles.alertButtonColor,
+                                          backgroundColor: crewUser
+                                                  .realTimeAlert
+                                              ? Colors.yellow
+                                              : LeaderStyles.alertButtonColor,
                                         ), //Set button color to dark red
                                         child: const Text(
                                           'Real Time Alert',

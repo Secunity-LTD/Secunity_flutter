@@ -34,11 +34,19 @@ class TeamService {
   Future<void> updatePosition(String crewUid) async {
     print("entered updatePosition - TeamService");
     print("squadUid: $uid");
-    await teamCollection.doc(uid).update({
-      'position': FieldValue.arrayUnion([crewUid]),
-    });
-    await CrewDatabaseService(uid: crewUid).updateInPositionStatus();
-    print('crewUid appended to position successfully: $crewUid');
+    Team team = await getTeamDetails();
+    if (!team.position.contains(crewUid)) {
+      await teamCollection.doc(uid).update({
+        'position': FieldValue.arrayUnion([crewUid]),
+      });
+      await CrewDatabaseService(uid: crewUid).updateInPositionStatus();
+      print('crewUid appended to position successfully: $crewUid');
+    } else {
+      await teamCollection.doc(uid).update({
+        'position': FieldValue.arrayRemove([crewUid]),
+      });
+      await CrewDatabaseService(uid: crewUid).updateInPositionStatus();
+    }
   }
 
   // Present all crew members in crewUid List
