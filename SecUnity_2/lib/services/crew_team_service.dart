@@ -26,4 +26,22 @@ class CrewTeamService {
       print('Error updating position: $e');
     }
   }
+
+  // Leave Team
+  Future<void> unAssign(String crewUid) async {
+    print("entered unAssign - CrewTeamService");
+    try {
+      return await teamService.deleteCrew(crewUid);
+    } catch (e) {
+      print('Error updating position: $e');
+    }
+  }
+  // Send Real Time Alert
+  Future<void> sendRealTimeAlert() async {
+    try {
+      return await teamService.sendRealTimeAlert();
+    } catch (e) {
+      print('Error updating position: $e');
+    }
+  }
 }

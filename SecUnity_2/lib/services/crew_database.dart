@@ -104,6 +104,21 @@ class CrewDatabaseService {
     ;
   }
 
+  // Delete crew member from a team
+  Future<void> unassignTeam() async {
+    print("entered updateAlertStatus");
+    CrewUser crewUser = await getCrewUserDetails();
+    print("crewUser.uid: ${crewUser.uid}");
+    print("crewUser.teamUid before: ${crewUser.teamUid}");
+    await crewCollection.doc(uid).update({
+      'team uid': '',
+      'leader uid': '',
+      'real time alert': false,
+      'in position': false,
+    });
+    print("crewUser.teamUid after: ${crewUser.teamUid}");
+  }
+
   Future updateTeamUid(String leaderUid) async {
     print("entered updateTeamUid");
     String? squadId = await getDocumentIdByLeaderUid(leaderUid);

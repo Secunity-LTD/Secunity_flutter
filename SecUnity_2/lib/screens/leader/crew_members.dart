@@ -85,8 +85,8 @@ class CrewMembersScreenState extends State<CrewMembersScreen> {
       subtitle: Text(crewUser.role),
       trailing: const Icon(Icons.delete),
       onTap: () {
-        
-        teamService!.deleteCrew(crewUser.uid!);
+
+       teamService!.deleteCrew(crewUser.uid!);
       },
     );
   }

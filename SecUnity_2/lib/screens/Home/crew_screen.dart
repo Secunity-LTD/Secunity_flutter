@@ -411,7 +411,7 @@ class _CrewPageState extends State<CrewScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.stretch,
                                     children: [
-                                      if (_hasTeam)
+                                      if (crewUser.teamUid.isNotEmpty)
                                         Center(
                                           child: Text(
                                             '$teamName Schedule',
@@ -483,8 +483,11 @@ class _CrewPageState extends State<CrewScreen> {
                                       ElevatedButton(
                                         onPressed: () {
                                           // Handle Real Time Alert button press
-                                          TeamService(uid: crewUser.teamUid)
-                                              .sendRealTimeAlert();
+                                          // TeamService(uid: crewUser.teamUid)
+                                          //     .sendRealTimeAlert();
+                                          CrewTeamService crewTeamService =
+                                              CrewTeamService(crewUser.teamUid);
+                                          crewTeamService.sendRealTimeAlert();
                                         },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:
@@ -499,7 +502,7 @@ class _CrewPageState extends State<CrewScreen> {
                                       ),
                                       const SizedBox(height: 14),
                                       // Additional buttons
-                                      if (_hasTeam)
+                                      if (crewUser.teamUid.isNotEmpty)
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceEvenly,
@@ -550,23 +553,20 @@ class _CrewPageState extends State<CrewScreen> {
                                             ),
                                             ElevatedButton(
                                               onPressed: () {
-                                                // TogglePosition();
-                                                // print("enter onPressd position");
-                                                // CrewTeamService crewTeamService =
-                                                //     CrewTeamService(
-                                                //         crewUser.teamUid);
-                                                // crewTeamService.updatePosition(
-                                                //     crewUser.uid!);
+                                                CrewTeamService
+                                                    crewTeamService =
+                                                    CrewTeamService(
+                                                        crewUser.teamUid);
+                                                crewTeamService
+                                                    .unAssign(crewUser.uid!);
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor:
-                                                    crewUser.realTimeAlert
-                                                        ? Colors.red
-                                                        : const Color.fromARGB(
-                                                            255, 41, 48, 96),
+                                                    const Color.fromARGB(
+                                                        255, 41, 48, 96),
                                               ),
                                               child: const Text(
-                                                'Emergency',
+                                                'Leave Team',
                                                 style: TextStyle(
                                                   color: Colors.white,
                                                 ),

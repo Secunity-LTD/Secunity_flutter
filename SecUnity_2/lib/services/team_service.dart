@@ -58,6 +58,7 @@ class TeamService {
     return teamCollection.doc(uid).snapshots().map((snapshot) =>
         Team.fromSnapshot(snapshot as DocumentSnapshot<Map<String, dynamic>>));
   }
+
   // Clear all positions array
   clearPositions() {
     print("entered clearPositions - TeamService");
@@ -76,11 +77,18 @@ class TeamService {
     print('position cleared successfully');
   }
 
-  deleteCrew(String crewUid) {
+  Future<void> deleteCrew(String crewUid) async {
     print("entered deleteCrew - TeamService");
-    teamCollection.doc(uid).update({
+    Team team = await getTeamDetails();
+    await teamCollection.doc(uid).update({
       'members': FieldValue.arrayRemove([crewUid]),
     });
+    if (team.position.contains(crewUid)) {
+      await teamCollection.doc(uid).update({
+        'position': FieldValue.arrayRemove([crewUid]),
+      });
+    }
+    CrewDatabaseService(uid: crewUid).unassignTeam();
     print('crewUid removed from members successfully: $crewUid');
   }
 
