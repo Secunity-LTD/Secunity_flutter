@@ -41,7 +41,26 @@ class PositionScreenState extends State<PositionScreen> {
       );
     }
     return Scaffold(
-      backgroundColor: PositionStyles.backgroundColor1,
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: PositionStyles.backgroundColor1,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // Add your onPressed logic here
+            },
+            child: Text('->'),
+            // Add your button style here
+          ),
+        ],
+        // Other app bar properties...
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -78,7 +97,8 @@ class PositionScreenState extends State<PositionScreen> {
                           );
                         } else {
                           return const Center(
-                              child: CircularProgressIndicator());
+                            child: CircularProgressIndicator(),
+                          );
                         }
                       },
                     ),
@@ -105,9 +125,10 @@ class PositionScreenState extends State<PositionScreen> {
         ),
       ),
     );
+
   }
 
-  // Widget for presenting crew member in the list
+    // Widget for presenting crew member in the list
   Widget buildPositionList(CrewUser crewUser) {
     return ListTile(
       title: Text('${crewUser.firstName} ${crewUser.lastName}'),
