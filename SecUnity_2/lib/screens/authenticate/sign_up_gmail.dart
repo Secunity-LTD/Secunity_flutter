@@ -35,7 +35,7 @@ class _SignUpGmailState extends State<SignUpGmail> {
             onPressed: () {
               widget.toggleView();
             },
-            style: TextButton.styleFrom(primary: secondary),
+            style: TextButton.styleFrom(foregroundColor: secondary),
             icon: Icon(Icons.person),
             label: Text(
               'Sign In',

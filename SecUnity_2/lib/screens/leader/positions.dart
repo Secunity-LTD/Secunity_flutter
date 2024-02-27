@@ -17,7 +17,7 @@ class PositionScreen extends StatefulWidget {
 class PositionScreenState extends State<PositionScreen> {
   TeamService? teamService;
   bool _isLoading = false;
-  List<String> crewUids = [];
+  //List<String> crewUids = [];
 
   @override
   void initState() {
