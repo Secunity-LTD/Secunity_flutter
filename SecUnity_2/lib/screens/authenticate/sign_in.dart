@@ -21,10 +21,9 @@ class _SignInState extends State<SignIn> {
 
   // text field state
   String error = "";
-  String email = "test";
-  String password = "test";
+  String email = "";
+  String password = "";
   int type = 0;
-
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +38,8 @@ class _SignInState extends State<SignIn> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => SignUp(toggleView: () {})),
+                MaterialPageRoute(
+                    builder: (context) => SignUp(toggleView: () {})),
               );
             },
             style: TextButton.styleFrom(
@@ -47,7 +47,8 @@ class _SignInState extends State<SignIn> {
               textStyle: TextStyle(fontSize: 20.0),
             ),
             icon: Icon(Icons.person),
-            label: Text('Sign Up',
+            label: Text(
+              'Sign Up',
               style: TextStyle(color: Colors.black),
             ),
           ),
@@ -91,16 +92,22 @@ class _SignInState extends State<SignIn> {
                     decoration: InputDecoration(
                       labelText: 'EMAIL',
                       labelStyle: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0 // Make the text bold
-                      ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0 // Make the text bold
+                          ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(
+                          borderSide: BorderSide(
                         color: Colors.white,
                         width: 2.0, // Set the width to make it bold
-                        )
-                      ),
+                      )),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Enter an email' : null,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18.0 // Make the text bold
+                        ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter an email' : null,
                     onChanged: (value) {
                       setState(() => email = value);
                     },
@@ -110,16 +117,22 @@ class _SignInState extends State<SignIn> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       labelStyle: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0
-                      ),
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.0),
                       focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(
-                            color: Colors.white,
-                            width: 2.0, // Set the width to make it bold
-                          )
-                      ),
+                        color: Colors.white,
+                        width: 2.0, // Set the width to make it bold
+                      )),
                     ),
-                    validator: (value) => value!.length < 6 ? 'Enter a password 6+ characters long' : null,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0 // Make the text bold
+                        ),
+                    validator: (value) => value!.length < 6
+                        ? 'Enter a password 6+ characters long'
+                        : null,
                     obscureText: true,
                     onChanged: (value) {
                       setState(() => password = value);
@@ -128,8 +141,8 @@ class _SignInState extends State<SignIn> {
                   SizedBox(height: 20.0),
                   ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          primary),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(primary),
                     ),
                     child: Text(
                       'Sign in',
@@ -137,7 +150,8 @@ class _SignInState extends State<SignIn> {
                     ),
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        dynamic result = await _authService.signIn(email, password);
+                        dynamic result =
+                            await _authService.signIn(email, password);
                         if (result == null) {
                           setState(() {
                             error = 'Could not sign in with the credentials';
@@ -156,7 +170,8 @@ class _SignInState extends State<SignIn> {
                   SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () async {
-                      dynamic result = await _authService.signInWithGoogle(context);
+                      dynamic result =
+                          await _authService.signInWithGoogle(context);
                       if (result == null) {
                         setState(() {
                           error = 'Could not sign in with the credentials';
@@ -168,7 +183,8 @@ class _SignInState extends State<SignIn> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Home(email: email, password: '123456'),
+                              builder: (context) =>
+                                  Home(email: email, password: '123456'),
                             ),
                           );
                         }
@@ -209,8 +225,4 @@ class _SignInState extends State<SignIn> {
       ),
     );
   }
-
-
 }
-
-

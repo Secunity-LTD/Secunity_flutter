@@ -50,16 +50,7 @@ class PositionScreenState extends State<PositionScreen> {
             Navigator.of(context).pop();
           },
         ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              // Add your onPressed logic here
-            },
-            child: Text('->'),
-            // Add your button style here
-          ),
-        ],
-        // Other app bar properties...
+        title: const Text('Positions'),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -112,7 +103,8 @@ class PositionScreenState extends State<PositionScreen> {
                     ),
                     child: Text(
                       'Clear Positions',
-                      style: LeaderStyles.buttonText, // Use buttonText style here
+                      style:
+                          LeaderStyles.buttonText, // Use buttonText style here
                     ),
                   ),
                 ],
@@ -125,10 +117,9 @@ class PositionScreenState extends State<PositionScreen> {
         ),
       ),
     );
-
   }
 
-    // Widget for presenting crew member in the list
+  // Widget for presenting crew member in the list
   Widget buildPositionList(CrewUser crewUser) {
     return ListTile(
       title: Text('${crewUser.firstName} ${crewUser.lastName}'),

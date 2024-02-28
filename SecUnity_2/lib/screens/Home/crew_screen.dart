@@ -107,6 +107,10 @@ class _CrewPageState extends State<CrewScreen> {
         setState(() {
           _hasTeam = true;
         });
+      } else {
+        setState(() {
+          _hasTeam = false;
+        });
       }
     } catch (e) {
       print('Error checking if the user has a team: $e');
@@ -562,6 +566,8 @@ class _CrewPageState extends State<CrewScreen> {
                                                         crewUser.teamUid);
                                                 crewTeamService
                                                     .unAssign(crewUser.uid!);
+
+                                                _hasTeam = false;
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor:

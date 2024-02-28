@@ -39,7 +39,8 @@ class _SignUpState extends State<SignUp> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => SignIn(toggleView: () {})),
+                MaterialPageRoute(
+                    builder: (context) => SignIn(toggleView: () {})),
               );
             },
             style: TextButton.styleFrom(
@@ -91,9 +92,17 @@ class _SignUpState extends State<SignUp> {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'First Name',
-                      labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0),
+                      labelStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Enter a first name' : null,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18 // Make the text bold
+                        ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter a first name' : null,
                     onChanged: (value) {
                       setState(() => firstName = value);
                     },
@@ -102,9 +111,17 @@ class _SignUpState extends State<SignUp> {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Last Name',
-                      labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0),
+                      labelStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Enter a last name' : null,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18 // Make the text bold
+                        ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter a last name' : null,
                     onChanged: (value) {
                       setState(() => lastName = value);
                     },
@@ -122,17 +139,18 @@ class _SignUpState extends State<SignUp> {
                         value: value,
                         child: Text(
                           value,
-                          style: value == 'Role'  // Check if the value is 'Role'
+                          style: value == 'Role' // Check if the value is 'Role'
                               ? TextStyle(
-                            color: Colors.white,  // Set the color for 'Role'
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22.0,
-                          )
+                                  color:
+                                      Colors.white, // Set the color for 'Role'
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                )
                               : TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22.0,
-                          ),
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                         ),
                       );
                     }).toList(),
@@ -141,9 +159,17 @@ class _SignUpState extends State<SignUp> {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0),
+                      labelStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
                     ),
-                    validator: (value) => value!.isEmpty ? 'Enter an email' : null,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18 // Make the text bold
+                        ),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Enter an email' : null,
                     onChanged: (value) {
                       setState(() => email = value);
                     },
@@ -152,10 +178,18 @@ class _SignUpState extends State<SignUp> {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0),
+                      labelStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 22),
                     ),
-                    validator: (value) =>
-                    value!.length < 6 ? 'Enter a password 6+ characters long' : null,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18 // Make the text bold
+                        ),
+                    validator: (value) => value!.length < 6
+                        ? 'Enter a password 6+ characters long'
+                        : null,
                     obscureText: true,
                     onChanged: (value) {
                       setState(() => password = value);
@@ -165,8 +199,15 @@ class _SignUpState extends State<SignUp> {
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Confirm Password',
-                      labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22.0),
+                      labelStyle: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
                     ),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22 // Make the text bold
+                        ),
                     validator: (value) {
                       if (value != password) {
                         return 'Passwords do not match';
@@ -191,17 +232,18 @@ class _SignUpState extends State<SignUp> {
                         value: value,
                         child: Text(
                           value,
-                          style: value == 'Type'  // Check if the value is 'Role'
+                          style: value == 'Type' // Check if the value is 'Role'
                               ? TextStyle(
-                            color: Colors.white,  // Set the color for 'Role'
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22.0,
-                          )
+                                  color:
+                                      Colors.white, // Set the color for 'Role'
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                )
                               : TextStyle(
-                            color: Colors.black87,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22.0,
-                          ),
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                         ),
                       );
                     }).toList(),
@@ -209,7 +251,8 @@ class _SignUpState extends State<SignUp> {
                   SizedBox(height: 10.0),
                   ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(primary),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(primary),
                     ),
                     child: Text(
                       'Sign up',
