@@ -469,7 +469,8 @@ class _CrewPageState extends State<CrewScreen> {
                                             TableRow(
                                               children: [
                                                 Center(
-                                                    child: Text('Monday',
+                                                    child: Text(
+                                                        _getDayName(dayIndex),
                                                         style: CrewStyles
                                                             .tableHeaderText)),
                                                 _buildTaskTextField(
