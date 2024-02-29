@@ -484,28 +484,30 @@ class _CrewPageState extends State<CrewScreen> {
                                       ),
                                       const SizedBox(height: 14),
                                       // Big button for Real Time Alert
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          // Handle Real Time Alert button press
-                                          // TeamService(uid: crewUser.teamUid)
-                                          //     .sendRealTimeAlert();
-                                          CrewTeamService crewTeamService =
-                                              CrewTeamService(crewUser.teamUid);
-                                          crewTeamService.sendRealTimeAlert();
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: crewUser
-                                                  .realTimeAlert
-                                              ? Colors.yellow
-                                              : LeaderStyles.alertButtonColor,
-                                        ), //Set button color to dark red
-                                        child: const Text(
-                                          'Real Time Alert',
-                                          style: TextStyle(
-                                            color: Colors.white,
+                                      if (_hasTeam)
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            // Handle Real Time Alert button press
+                                            // TeamService(uid: crewUser.teamUid)
+                                            //     .sendRealTimeAlert();
+                                            CrewTeamService crewTeamService =
+                                                CrewTeamService(
+                                                    crewUser.teamUid);
+                                            crewTeamService.sendRealTimeAlert();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: crewUser
+                                                    .realTimeAlert
+                                                ? Colors.yellow
+                                                : LeaderStyles.alertButtonColor,
+                                          ), //Set button color to dark red
+                                          child: const Text(
+                                            'Real Time Alert',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
-                                      ),
                                       const SizedBox(height: 14),
                                       // Additional buttons
                                       if (crewUser.teamUid.isNotEmpty)
@@ -513,26 +515,6 @@ class _CrewPageState extends State<CrewScreen> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                // Handle button press
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    const Color.fromARGB(
-                                                  255,
-                                                  41,
-                                                  48,
-                                                  96,
-                                                ), // Set button color to dark red
-                                              ),
-                                              child: const Text(
-                                                'Requests',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
                                             ElevatedButton(
                                               onPressed: () {
                                                 print(

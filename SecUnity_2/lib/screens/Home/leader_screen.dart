@@ -532,7 +532,8 @@ class _LeaderPageState extends State<LeaderScreen> {
                                             TableRow(
                                               children: [
                                                 Center(
-                                                    child: Text('Monday',
+                                                    child: Text(
+                                                        _getDayName(dayIndex),
                                                         style: LeaderStyles
                                                             .tableHeaderText)),
                                                 _buildTaskTextField(
@@ -546,24 +547,25 @@ class _LeaderPageState extends State<LeaderScreen> {
                                         ],
                                       ),
                                       SizedBox(height: 14),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          // Handle Real Time Alert button press
-                                          TeamService(uid: leaderUser.teamUid)
-                                              .sendRealTimeAlert();
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: leaderUser
-                                                  .realTimeAlert
-                                              ? Colors.yellow
-                                              : LeaderStyles.alertButtonColor,
+                                      if (squadCreated)
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            // Handle Real Time Alert button press
+                                            TeamService(uid: leaderUser.teamUid)
+                                                .sendRealTimeAlert();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: leaderUser
+                                                    .realTimeAlert
+                                                ? Colors.yellow
+                                                : LeaderStyles.alertButtonColor,
+                                          ),
+                                          child: Text(
+                                            'Real Time Alert',
+                                            style: LeaderStyles
+                                                .buttonText, // Use buttonText style here
+                                          ),
                                         ),
-                                        child: Text(
-                                          'Real Time Alert',
-                                          style: LeaderStyles
-                                              .buttonText, // Use buttonText style here
-                                        ),
-                                      ),
                                       SizedBox(height: 14),
                                       if (squadCreated)
                                         Row(
