@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:secunity_2/constants/signup_style.dart';
+import 'package:secunity_2/screens/authenticate/sign_in.dart';
 import '../../constants/constants.dart';
 import '../../services/auth_service.dart';
 import '../Home/home.dart';
@@ -25,17 +27,26 @@ class _SignUpGmailState extends State<SignUpGmail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: secondary,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: primary,
+        backgroundColor: SignupStyles.backgroundColor1,
         elevation: 0.0,
-        title: Text('complete details for SecUnity'),
+        title: const Text(
+          'complete details for SecUnity',
+          style: TextStyle(fontSize: 15.00,)),
         actions: <Widget>[
           TextButton.icon(
             onPressed: () {
-              widget.toggleView();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SignIn(toggleView: () {})),
+              );
             },
-            style: TextButton.styleFrom(foregroundColor: secondary),
+            style: TextButton.styleFrom(
+              foregroundColor: secondary,
+              textStyle: TextStyle(fontSize: 20.0),
+            ),
             icon: Icon(Icons.person),
             label: Text(
               'Sign In',
@@ -44,15 +55,52 @@ class _SignUpGmailState extends State<SignUpGmail> {
           ),
         ],
       ),
-      body: Form(
+      body: Stack(
+        children: <Widget>[
+      Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+        colors: [
+        SignupStyles.backgroundColor1,
+        SignupStyles.backgroundColor2,
+        SignupStyles.backgroundColor3,
+        SignupStyles.backgroundColor4,
+        SignupStyles.backgroundColor5,
+        ],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      ),
+    ),
+    ),
+    Center(
+    child: Container(
+    decoration: BoxDecoration(
+    image: DecorationImage(
+    image: AssetImage("assets/Secunity_Background.png"),
+    fit: BoxFit.none,
+    ),
+    ),
+    ),
+    ),
+    Padding(
+    padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
+    child: Form(
         key: _formKey, // Add this line
         child: ListView(
           padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 50.0),
           children: <Widget>[
             SizedBox(height: 10.0),
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'First Name',
+                labelStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18 // Make the text bold
               ),
               validator: (value) =>
                   value!.isEmpty ? 'Enter a first name' : null,
@@ -64,6 +112,14 @@ class _SignUpGmailState extends State<SignUpGmail> {
             TextFormField(
               decoration: InputDecoration(
                 labelText: 'Last Name',
+                labelStyle: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+              ),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18 // Make the text bold
               ),
               validator: (value) => value!.isEmpty ? 'Enter a last name' : null,
               onChanged: (value) {
@@ -84,7 +140,20 @@ class _SignUpGmailState extends State<SignUpGmail> {
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value),
+                  child: Text(
+                    value,
+                    style: value == 'Role' // Check if the value is 'Role'
+                        ? TextStyle(
+                      color:
+                      Colors.white, // Set the color for 'Role'
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    )
+                        : TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),),
                 );
               }).toList(),
             ),
@@ -103,7 +172,21 @@ class _SignUpGmailState extends State<SignUpGmail> {
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value),
+                  child: Text(
+                      value,
+                    style: value == 'Type' // Check if the value is 'Role'
+                        ? TextStyle(
+                      color:
+                      Colors.white, // Set the color for 'Role'
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    )
+                        : TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
                 );
               }).toList(),
             ),
@@ -152,6 +235,9 @@ class _SignUpGmailState extends State<SignUpGmail> {
           ],
         ),
       ),
+    ),
+        ],
+        ),
     );
   }
 }
