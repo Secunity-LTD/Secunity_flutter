@@ -4,6 +4,8 @@ import 'package:secunity_2/screens/authenticate/sign_in.dart';
 import '../../constants/constants.dart';
 import '../../services/auth_service.dart';
 import '../Home/home.dart';
+import '../../constants/signin_style.dart';
+import 'sign_up.dart';
 
 class SignUpGmail extends StatefulWidget {
   final Function toggleView;
@@ -18,7 +20,6 @@ class _SignUpGmailState extends State<SignUpGmail> {
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
   String error = '';
-  String userType = '0';
   String firstName = '';
   String lastName = '';
   String dropdownValue = 'Role';
@@ -49,7 +50,7 @@ class _SignUpGmailState extends State<SignUpGmail> {
             ),
             icon: Icon(Icons.person),
             label: Text(
-              'Sign In',
+              'Sign Ip',
               style: TextStyle(color: Colors.black),
             ),
           ),
@@ -101,12 +102,8 @@ class _SignUpGmailState extends State<SignUpGmail> {
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18 // Make the text bold
+
               ),
-              validator: (value) =>
-                  value!.isEmpty ? 'Enter a first name' : null,
-              onChanged: (value) {
-                setState(() => firstName = value);
-              },
             ),
             SizedBox(height: 10.0),
             TextFormField(
@@ -121,10 +118,6 @@ class _SignUpGmailState extends State<SignUpGmail> {
                   fontWeight: FontWeight.bold,
                   fontSize: 18 // Make the text bold
               ),
-              validator: (value) => value!.isEmpty ? 'Enter a last name' : null,
-              onChanged: (value) {
-                setState(() => lastName = value);
-              },
             ),
             DropdownButton<String>(
               value: dropdownValue, // Default value
@@ -206,34 +199,84 @@ class _SignUpGmailState extends State<SignUpGmail> {
                       firstName, lastName, dropdownValue, dropdownValueTeam);
                   if (result == null) {
                     setState(() {
-                      error = 'Please provide a valid email';
-                      loading = false;
+                      dropdownValue = newValue!;
                     });
-                  } else if (result == 1) {
-                    setState(() {
-                      error = 'The email is already in use';
-                      loading = false;
-                    });
-                  } else {
-                    // Navigator.pushReplacementNamed(context, '/sign_in');
-                    // Navigate to LeaderScreen after successful sign-in
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Home(),
-                      ),
+                    // Handle any other actions
+                    print(newValue);
+                  },
+                  items: <String>['Role', 'Medic', 'Sniper', 'Negev']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
                     );
-                  }
-                }
-              },
+                  }).toList(),
+                ),
+                SizedBox(height: 10.0),
+                DropdownButton<String>(
+                  value: dropdownValueTeam, // Default value
+                  onChanged: (String? newValue) {
+                    // Update dropdown value
+                    setState(() {
+                      dropdownValueTeam = newValue!;
+                    });
+                    // Handle any other actions
+                    print(newValue);
+                  },
+                  items: <String>['Type', 'Team leader', 'Crew member']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 10.0),
+                ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(primary),
+                  ),
+                  child: Text(
+                    'Sign up',
+                    style: TextStyle(color: secondary),
+                  ),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      setState(() => loading = true);
+                      dynamic result = await _authService.SignUpGmail(firstName,
+                          lastName, dropdownValue, dropdownValueTeam);
+                      if (result == null) {
+                        setState(() {
+                          error = 'Please provide a valid email';
+                          loading = false;
+                        });
+                      } else if (result == 1) {
+                        setState(() {
+                          error = 'The email is already in use';
+                          loading = false;
+                        });
+                      } else {
+                        // Navigator.pushReplacementNamed(context, '/sign_in');
+                        // Navigate to LeaderScreen after successful sign-in
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Home(),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+                SizedBox(height: 12.0),
+                Text(
+                  error,
+                  style: TextStyle(color: errorColor, fontSize: 14.0),
+                )
+              ],
             ),
-            SizedBox(height: 12.0),
-            Text(
-              error,
-              style: TextStyle(color: errorColor, fontSize: 14.0),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     ),
         ],
