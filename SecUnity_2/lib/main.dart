@@ -14,7 +14,7 @@ import 'package:secunity_2/screens/authenticate/login_screen.dart';
 import 'package:secunity_2/screens/authenticate/sign_up.dart';
 import 'package:flutter/material.dart';
 import 'models/UserModel.dart';
-
+import 'package:dcdg/dcdg.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
